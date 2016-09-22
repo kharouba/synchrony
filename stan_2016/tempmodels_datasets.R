@@ -3,12 +3,15 @@
 rm(list=ls())
 #row.names=FALSE
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
 library(ggplot2)
 library(rstan)
-library(shinyStan)
+library(shinystan)
 library(grid)
 library(nlme)
 library(gridExtra)
+library(plyr)
+library(dplyr)
 set_cppo("fast") 
 
 ## HAS TEMP CHANGED?
@@ -71,11 +74,13 @@ sub2<-subset(clim3, studyid=="HMK011" & species=="Poecile montanus")
 sub2$datasetid<-with(sub2, paste(studyid,"_",2))
 sub3<-subset(clim3, studyid=="HMK019" & species=="Phytoplankton1 spp.")
 sub3$datasetid<-with(sub3, paste(studyid,"_",3))
-sub4<-subset(clim3, studyid=="HMK019" & species!="Phytoplankton1 spp.")
-sub4$datasetid<-with(sub4, paste(studyid,"_",4))
+# for below EMW manually checked that all 3 remaining species (Perca fluviatillis, Daphnia3b spp., Daphnia3a spp., ) have same n years; then just picked one to subset on
+sub4<-subset(clim3, studyid=="HMK019" & species=="Perca fluviatillis")
+sub4$datasetid<-with(sub4, paste(studyid,"_",4)) 
 sub5<-subset(clim3, studyid=="HMK038" & species=="Glis glis")
 sub5$datasetid<-with(sub5, paste(studyid,"_",5))
-sub6<-subset(clim3, studyid=="HMK038" & species!="Glis glis")
+# for below EMW manually checked that all 4 remaining species have same n years
+sub6<-subset(clim3, studyid=="HMK038" & species=="Sitta europaea")
 sub6$datasetid<-with(sub6, paste(studyid,"_",6))
 sub7<-subset(clim3, studyid=="HMK051" & species=="Caterpillar4 spp.")
 sub7$datasetid<-with(sub7, paste(studyid,"_",7))
@@ -84,39 +89,45 @@ sub8$datasetid<-with(sub8, paste(studyid,"_",8))
 sub9<-subset(clim3, studyid=="HMK051" & species=="Parus3 caeruleus")
 sub9$datasetid<-with(sub9, paste(studyid,"_",9))
 
-sub10<-subset(clim3, studyid=="HMK023")
+# For all of the below I looked at all species, checked the n yrs were the same and...
+# picked a species to subset on
+sub10<-subset(clim3, studyid=="HMK023" & species=="Bombus spp.")
 sub10$datasetid<-with(sub10, paste(studyid,"_",10))
-sub11<-subset(clim3, studyid=="HMK031")
+sub11<-subset(clim3, studyid=="HMK031" & species=="Thermocyclops oithonoides")
 sub11$datasetid<-with(sub11, paste(studyid,"_",11))
-sub12<-subset(clim3, studyid=="HMK034")
+sub12<-subset(clim3, studyid=="HMK034" & species=="Cyclops vicinus")
 sub12$datasetid<-with(sub12, paste(studyid,"_",12))
-sub13<-subset(clim3, studyid=="HMK043")
+sub13<-subset(clim3, studyid=="HMK043" & species=="Beroe gracilis")
 sub13$datasetid<-with(sub13, paste(studyid,"_",13))
-sub14<-subset(clim3, studyid=="HMK016")
+sub14<-subset(clim3, studyid=="HMK016" & species=="Cerorhinca monocerata")
 sub14$datasetid<-with(sub14, paste(studyid,"_",14))
-sub15<-subset(clim3, studyid=="HMK018")
+sub15<-subset(clim3, studyid=="HMK018" & species=="Pygoscelis_b antarcticus")
 sub15$datasetid<-with(sub15, paste(studyid,"_",15))
-sub16<-subset(clim3, studyid=="HMK052")
+sub16<-subset(clim3, studyid=="HMK052" & species=="Pica pica")
 sub16$datasetid<-with(sub16, paste(studyid,"_",16))
-sub17<-subset(clim3, studyid=="HMK036")
+sub17<-subset(clim3, studyid=="HMK036" & species=="Copepod1 spp.")
 sub17$datasetid<-with(sub17, paste(studyid,"_",17))
-sub18<-subset(clim3, studyid=="HMK042")
+sub18<-subset(clim3, studyid=="HMK042" & species=="Acrocephalus arundinaceus")
 sub18$datasetid<-with(sub18, paste(studyid,"_",18))
 
 dataset<-rbind(sub1, sub2, sub3, sub4, sub5, sub6, sub7, sub8, sub9, sub10, sub11, sub12, sub13, sub14, sub15, sub16, sub17, sub18)
+
+# check, which datasetids have more than one species
+ddply(dataset, c("datasetid"), summarise,
+    nspp=n_distinct(species))
 
 #dataset<-unique(clim3[,c("studyid","year","envfactor","envunits","envtype","envvalue","newyear","yr1981")])
 dataset <- dataset[with(dataset, order(datasetid)),]
 N<-nrow(dataset)
 y <- dataset$envvalue
-specieschar.hin<- aggregate(dataset["envvalue"], dataset[c("datasetid")], FUN=length) #number of years per dataset
+specieschar.hin<- aggregate(dataset["envvalue"], dataset[c("datasetid")], FUN=length) 
 specieschar.hin <- specieschar.hin[with(specieschar.hin, order(datasetid)),]
 Nspp <- nrow(specieschar.hin) #J
 #J <- nrow(specieschar.hin)
 species <- as.numeric(as.factor(dataset$datasetid))
 year <- dataset$yr1981
 
-temp.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 
 goo <- extract(temp.model)
@@ -139,6 +150,49 @@ mean(data$stanfit)
 sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
 #95% confidence intervals of the mean
 c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
+
+# lizzie checks against some linear models
+idshere <- unique(dataset$datasetid)
+lmfits <- data.frame(datasetid=NA, lmfit=NA)
+
+for (uniqdataset in seq_along(idshere)){
+    subby <- subset(dataset, datasetid==idshere[uniqdataset])
+    modelhere <- lm(envvalue~yr1981, data=subby)
+    lmfits[uniqdataset,] <- data.frame(datasetit=idshere[uniqdataset], lmfit=coef(modelhere)[2])
+}
+
+compare.models <- cbind(lmfits, data$stanfit, idshere)
+
+plot(lmfit~data$stanfit, data=compare.models)
+abline(0,1)
+abline(lm(lmfit~data$stanfit, data=compare.models))
+
+# looking at few datasets
+
+# start with one long-term one
+# this looks pretty clear and strong and the agreement between stan and lm is good
+subby <- subset(dataset, datasetid=="HMK019 _ 3")
+plot(envvalue~yr1981, data=subby)
+abline(lm(envvalue~yr1981, data=subby))
+
+# one more long term one
+# yeah, this model is totally working!
+subby <- subset(dataset, datasetid=="HMK031 _ 11")
+plot(envvalue~yr1981, data=subby)
+abline(lm(envvalue~yr1981, data=subby))
+
+# now look at one where a big increase get decreased by stan
+# okay, I could see that getting smaller
+subby <- subset(dataset, datasetid=="HMK011 _ 1")
+plot(envvalue~yr1981, data=subby)
+abline(lm(envvalue~yr1981, data=subby))
+
+# now look at one where decrease gets pulled to the mean (positive change) by stan
+# right
+subby <- subset(dataset, datasetid=="HMK052 _ 16")
+plot(envvalue~yr1981, data=subby)
+abline(lm(envvalue~yr1981, data=subby))
+
 
 #by group
 sub<-subset(data, envtype=="air"); mean(sub$stanfit)
