@@ -1,8 +1,12 @@
 ##### TO GET TEMP CHANGE PER INTERACTION ######
 
 rm(list=ls())
+options(stringsAsFactors=FALSE)
+
+
 #row.names=FALSE
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
 library(ggplot2)
 library(rstan)
 library(shinyStan)
@@ -10,96 +14,90 @@ library(grid)
 library(nlme)
 library(gridExtra)
 library(reshape)
+library(plyr)
+library(dplyr)
 set_cppo("fast") 
 
 ## HAS TEMP CHANGED?
-clim<-read.csv("input/climate3.csv", header=TRUE, na.strings="<NA>", as.is=TRUE)
-clim$name_env<-with(clim, paste(species, phenophase, sep="_"))
-clim<-subset(clim, phenophase!="start" & extra!="10" & envunits=="C" & studyid!="HMK028" & studyid!="HMK029" & studyid!="HMK037") #029,037 because nutrients>phenology; 028- because temperature sum
-clim$envvalue<-as.numeric(clim$envvalue)
-clim$envfactor[clim$envfactor=="temperaure"] <- "temperature"
+## source the temp dataset cleaning code
 
-# Mean temp across sites for those studies with multiple sites
-sites<-subset(clim, studyid=="HMK018" | studyid=="HMK019" | studyid=="HMK023" & site!="tomakomai")
-nosites<-subset(clim, site=="tomakomai" | studyid!="HMK018" & studyid!="HMK019" & studyid!="HMK023")
-nosites<-nosites[,c("studyid","envfactor","envunits","envtype","year","species","envvalue")]
+source("source/clean_tempdatasets.R")
 
-new<-with(sites, aggregate(envvalue, by=list(studyid, year, species), FUN=mean, na.rm=T)) # across sites
-names(new)[1]<-"studyid"; names(new)[2]<-"year"; names(new)[3]<-"species"; names(new)[4]<-"envvalue"
-new<-new[order(new$studyid),]
-#'all' species: "HMK018" "HMK023" "HMK028" "HMK029" "HMK036" "HMK042" "HMK043" >> now fixed in climate3.csv
+# check, which datasetids have more than one species
+ddply(dataset, c("datasetid"), summarise,
+    nspp=n_distinct(species))
 
-sites2<-merge(sites[,c("studyid","envfactor","envunits","envtype","year","species")], new, by=c("studyid","year","species"))
-sites3<-unique(sites2[,c("studyid","envfactor","envunits","envtype","year","species","envvalue")])
-
-clim2<-rbind(nosites, sites3) # all years with data
-#merge with spp data so calculating env change only over the years of interaction
-total3<-read.csv("input/raw_april.csv", header=TRUE, na.strings="NA", as.is=TRUE)
-total3<-na.omit(total3)
-clim3<-merge(clim2, total3[,c("studyid","year")], by=c("studyid","year"))
-clim3<-unique(clim3[,c("studyid","year","envfactor","envunits","envtype","species","envvalue")])
-clim3<-na.omit(clim3)
-
-#Hinge (11 spp)
-hinge<-subset(clim3, species=="Acrocephalus arundinaceus" | species=="Acrocephalus scirpaceus" | species=="Copepod1 spp." | species=="Copepod2 spp." | species=="Cyclops vicinus"  | species=="Daphnia3a spp." | species=="Daphnia3b spp."| species=="Diatom3 spp." | species=="Perca fluviatillis" | species=="Phytoplankton1 spp." | species=="Pleurobrachia pileus" | species=="Pleurobrachia_a pileus")
-
-#Non-hinge (11 spp)
-hinge_non<-subset(clim3, species!="Acrocephalus arundinaceus" & species!="Acrocephalus scirpaceus"  & species!="Copepod1 spp." & species!="Copepod2 spp." & species!="Cyclops vicinus"  & species!="Daphnia3a spp." & species!="Daphnia3b spp." & species!="Diatom3 spp." & species!="Perca fluviatillis" & species!="Phytoplankton1 spp." & species!="Pleurobrachia pileus" & species!="Pleurobrachia_a pileus")
-
-hinge_non$newyear<-hinge_non$year
-hinge_pre<-subset(hinge, year<=1981); hinge_pre$newyear<-1981
-hinge_post<-subset(hinge, year>1981); hinge_post$newyear<-hinge_post$year
-hinges<-rbind(hinge_pre, hinge_post)
-
-clim4<-rbind(hinge_non, hinges);
-clim3<-clim4
-clim3$yr1981 <- clim3$newyear-1981
-
-clim3 <- clim3[with(clim3, order(species, year)),]
-N<-nrow(clim3)
-y <- clim3$envvalue
-specieschar.hin<- aggregate(clim3["envvalue"], clim3[c("species")], FUN=length)
+dataset <- dataset[with(dataset, order(species, year)),]
+N<-nrow(dataset)
+y <- dataset$envvalue
+specieschar.hin<- aggregate(dataset["envvalue"], dataset[c("species")], FUN=length)
 specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
 Nspp <- nrow(specieschar.hin) #J
-species <- as.numeric(as.factor(clim3$species))
-year <- clim3$yr1981
+species <- as.numeric(as.factor(dataset$species))
+year <- dataset$yr1981
 
-temp.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
-WHY AM I GETTING TWO DIFFERENT SLOPE ESTIMATES FROM SAME DATA, E.G .HMK042?????
-ASSUME FOR NOW ONE ESTIMATE OF TEMP CHANGE PER STUDY!
-
-
-!!!!!!! Mix up happens between species > interactions, beween summ_studyspp, temp_int
-
-summ_studyspp <- subset(clim3, select=c("studyid","species")); 
-summ_studyspp<-unique(summ_studyspp)
+summ_studyspp <- subset(dataset, select=c("studyid","species", "datasetid")); 
+summ_studyspp <- unique(summ_studyspp)
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 
 goo <- extract(temp.model) 
 
-specieschar.formodel <- aggregate(clim3["envvalue"], clim3[c("studyid","species")], FUN=length) #number of years
-specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid","species"))
-rawlong <- read.csv("rawlong.csv", header=TRUE)
-sol<-merge(specieschar.formodel.sm, unique(rawlong[,c("studyid","intid","species")]), by=c("studyid","species"))
-#sol<- sol[with(sol,order(species)),]
-intid <- read.csv("input/raw_april.csv", header=TRUE)
-intid2<-merge(intid, unique(sol[,c("studyid","intid")]), by=c("studyid","intid"))
-intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction"))
-intid.nodups <- intid.sm[!duplicated(intid.sm),]
-temp_int<-intid.nodups #temp change interactions
-temp_int<- temp_int[with(temp_int,order(intid)),]
+specieschar.formodel <- aggregate(dataset["envvalue"], dataset[c("studyid","species",
+    "datasetid")], FUN=length)
+# number of years (which is correct, I double-checked below)
+ddply(dataset, c("studyid", "species", "datasetid"), summarise,
+    nspp=n_distinct(year))
+specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species", "datasetid"))
 
-temp.change <- matrix(0, ncol=3000, nrow=22) #2000 iterations for 22 interactions;
-for (i in 3000:6000){ # 2000 iterations?
-    summ_studyspp$model <- goo$b[i,]
-    andtheanswer <- merge(temp_int, summ_studyspp, by.x=c("studyid", "spp1"), by.y=c("studyid", "species"), all.x=TRUE)
-    andtheanswer <- merge(andtheanswer, summ_studyspp, by.x=c("studyid","spp2"), by.y=c("studyid", "species"), all.x=TRUE)
-       andtheanswer[andtheanswer$spp1=="Engraulis japonicus","model.x"]<- andtheanswer[andtheanswer$spp1=="Engraulis japonicus","model.y"] #Engraulis japonicus because first day of temp X
-       andtheanswer[andtheanswer$spp1=="Diatom2a","model.x"]<-andtheanswer[andtheanswer$spp1=="Diatom2a","model.y"] #Diatom2 spp. because first day of temp X
-       andtheanswer[andtheanswer$spp1=="Diatom2b","model.x"]<-andtheanswer[andtheanswer$spp1=="Diatom2b","model.y"]#Diatom2 spp.] because first day of temp X
-    andtheanswer$meanmodel <- rowMeans(andtheanswer[,c(6:7)]) # take mean because want avg temp change PER interaction
-    temp.change[,(i-3000)] <- andtheanswer$meanmodel
+# Step 1 in the merge: Get the intid
+rawlong <- read.csv("rawlong.csv", header=TRUE)
+sol<-merge(specieschar.formodel.sm, unique(rawlong[,c("studyid","intid")]),
+   by=c("studyid"), all.x=TRUE)
+#sol<- sol[with(sol,order(species)),]
+
+# Step 2 in the merge: Get the rest of the info
+intid <- read.csv("input/raw_april.csv", header=TRUE)
+intid2 <- merge(intid, unique(sol[,c("studyid","intid", "datasetid")]), by=c("studyid","intid"),
+    all.y=TRUE)
+dim(unique(intid2[,c("studyid","intid", "datasetid")]))
+intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction", "datasetid"))
+intid.nodups <- intid.sm[!duplicated(intid.sm),]
+temp_int <- intid.nodups #temp change interactions
+temp_int <- temp_int[with(temp_int,order(intid)),]
+
+unique(temp_int[,c("species", "datasetid")])
+
+# Increase iterations someday!
+# Get means for all interactions, including ...
+# Those interactions where each species had a slightly different climate dataset
+
+# Now we need to get the averages since some species 
+temp.change <- matrix(0, ncol=1000, nrow=22) # 1000 iterations for 22 interactions;
+for (i in 2000:3000){ # 2000 iterations?
+    summ_studyspp$model.est <- goo$b[i,]
+    # step 1: Get back the missing species
+    allspecieswcoef <- merge(summ_studyspp, datasetid.trans, by=c("datasetid",
+         "studyid"), all.y=TRUE, suffixes=c(".model", ".data"))
+    allspecieswcoef <- subset(allspecieswcoef, select=c("datasetid", "model.est", "species.data"))
+    names(allspecieswcoef)[names(allspecieswcoef)=="species.data"] <- "species"
+    # step 2 merge in spp1 and spp2 
+    andtheanswer <- merge(temp_int, allspecieswcoef, by.x=c("datasetid", "spp1"),
+        by.y=c("datasetid", "species"), all.x=TRUE)
+    andtheanswer <- merge(andtheanswer, allspecieswcoef, by.x=c("datasetid","spp2"),
+        by.y=c("datasetid", "species"), all.x=TRUE, suffixes=c(".spp1",".spp2"))
+    # step 3 now we need to aggregate by spp1 and spp2 for the cases where we have
+    # different estimates for each spp in an interaction
+    models.intid <- data.frame(intid=rep(andtheanswer$intid, 2), model.est=c(
+        andtheanswer$model.est.spp1, andtheanswer$model.est.spp2))
+    modelmeanz <- ddply(models.intid , c("intid"), summarise,
+        model.mean=mean(model.est, na.rm=TRUE))
+    temp.change[,(i-2000)] <- modelmeanz$model.mean
 }
 
-intid.nodups$stanfit <- rowMeans(temp.change, na.rm=TRUE) #mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
+row.names(temp.change) <- modelmeanz$intid
+intid.wtempchange <- data.frame(intid=modelmeanz$intid, stanfit=rowMeans(temp.change, na.rm=TRUE)) # mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
+
+write.csv(temp.change, "output/temp.change.1K.csv")
+write.csv(intid.wtempchange, "output/temp.change.meanover1K.csv", row.names=FALSE)

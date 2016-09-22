@@ -96,5 +96,36 @@ sub17$datasetid<-with(sub17, paste(studyid,"_",17))
 sub18<-subset(clim3, studyid=="HMK042" & species=="Acrocephalus arundinaceus")
 sub18$datasetid<-with(sub18, paste(studyid,"_",18))
 
-dataset<-rbind(sub1, sub2, sub3, sub4, sub5, sub6, sub7, sub8, sub9, sub10,
-    sub11, sub12, sub13, sub14, sub15, sub16, sub17, sub18)
+
+# Now! make a list of what datasetid each species belongs to, without dropping any species
+# (note that we did drop species to make dataset)
+# a translator so to speak!
+
+datasetid.trans.full <- merge(dataset, clim3, by=c("species", "studyid"), all.y=TRUE, all.x=TRUE)
+datasetid.trans <- subset(datasetid.trans.full, select=c("species", "studyid", "datasetid"))
+datasetid.trans <- datasetid.trans[!duplicated(datasetid.trans),]
+
+# get a list of the species x datasetids that we don't have above!
+lookuptable <- c("Corydalis ambigua"="HMK023 _ 10", "Diatom2b spp."="HMK031 _ 11",
+    "Diatom2a spp."="HMK031 _ 11", "Daphnia1 spp."="HMK031 _ 11",
+    "Phytoplankton2 spp."="HMK034 _ 12", "Pleurobrachia pileus"="HMK043 _ 13",
+    "Copepod2 spp."="HMK043 _ 13", "Pleurobrachia_a pileus"="HMK043 _ 13",
+    "Engraulis japonicus"="HMK016 _ 14", "Pygoscelis adeliae"="HMK018 _ 15",
+    "Pygoscelis_a antarcticus"="HMK018 _ 15", "Pygoscelis papua"="HMK018 _ 15",
+    "Clamator glandarius"="HMK052 _ 16", "Diatom3 spp."="HMK036 _ 17",
+    "Acrocephalus scirpaceus"="HMK042 _ 18", "Daphnia3b spp."="HMK019 _ 4",
+    "Phytoplankton1 spp."="HMK019 _ 4", "Daphnia3a spp."="HMK019 _ 4",
+    "Ficedula2 albicollis"="HMK038 _ 6", "Parus caeruleus"="HMK038 _ 6", 
+    "Glis glis"="HMK038 _ 6", "Parus3 major"="HMK038 _ 6")
+
+# now make a dataframe (not pretty, but works)
+mergemein <- data.frame(species=row.names(as.data.frame(lookuptable)),
+    datasetid.more=as.data.frame(lookuptable)$lookuptable)
+
+datasetid.trans <- merge(datasetid.trans, mergemein, by=c("species"),
+     all.y=TRUE, all.x=TRUE)
+
+datasetid.trans$datasetid[is.na(datasetid.trans$datasetid)==TRUE] <-
+    datasetid.trans$datasetid.more[is.na(datasetid.trans$datasetid)==TRUE]
+
+datasetid.trans$datasetid.more <- NULL
