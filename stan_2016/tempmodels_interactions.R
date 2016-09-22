@@ -97,6 +97,9 @@ for (i in 2000:3000){ # 2000 iterations?
 }
 
 row.names(temp.change) <- modelmeanz$intid
+temp.change <- as.data.frame(temp.change)
+temp.change$intid <- modelmeanz$intid
+
 intid.wtempchange <- data.frame(intid=modelmeanz$intid, stanfit=rowMeans(temp.change, na.rm=TRUE)) # mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
 
 write.csv(temp.change, "output/temp.change.1K.csv")

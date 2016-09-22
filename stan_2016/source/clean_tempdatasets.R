@@ -114,9 +114,8 @@ lookuptable <- c("Corydalis ambigua"="HMK023 _ 10", "Diatom2b spp."="HMK031 _ 11
     "Pygoscelis_a antarcticus"="HMK018 _ 15", "Pygoscelis papua"="HMK018 _ 15",
     "Clamator glandarius"="HMK052 _ 16", "Diatom3 spp."="HMK036 _ 17",
     "Acrocephalus scirpaceus"="HMK042 _ 18", "Daphnia3b spp."="HMK019 _ 4",
-    "Phytoplankton1 spp."="HMK019 _ 4", "Daphnia3a spp."="HMK019 _ 4",
-    "Ficedula2 albicollis"="HMK038 _ 6", "Parus caeruleus"="HMK038 _ 6", 
-    "Glis glis"="HMK038 _ 6", "Parus3 major"="HMK038 _ 6")
+    "Daphnia3a spp."="HMK019 _ 4", "Ficedula2 albicollis"="HMK038 _ 6", 
+    "Parus caeruleus"="HMK038 _ 6", "Parus3 major"="HMK038 _ 6")
 
 # now make a dataframe (not pretty, but works)
 mergemein <- data.frame(species=row.names(as.data.frame(lookuptable)),
