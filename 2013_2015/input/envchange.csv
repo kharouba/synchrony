@@ -1,0 +1,546 @@
+"","studyid","envfactor","envunits","species","year","envtype","envchange"
+"1","EMW001","temperature","days","all",1950,"water",0.00288320712788251
+"2","EMW001","temperature","days","all",1951,"water",0.00288320712788251
+"3","EMW001","temperature","days","all",1952,"water",0.00288320712788251
+"4","EMW001","temperature","days","all",1953,"water",0.00288320712788251
+"5","EMW001","temperature","days","all",1954,"water",0.00288320712788251
+"6","EMW001","temperature","days","all",1955,"water",0.00288320712788251
+"7","EMW001","temperature","days","all",1956,"water",0.00288320712788251
+"8","EMW001","temperature","days","all",1957,"water",0.00288320712788251
+"9","EMW001","temperature","days","all",1958,"water",0.00288320712788251
+"10","EMW001","temperature","days","all",1959,"water",0.00288320712788251
+"11","EMW001","temperature","days","all",1960,"water",0.00288320712788251
+"12","EMW001","temperature","days","all",1961,"water",0.00288320712788251
+"13","EMW001","temperature","days","all",1962,"water",0.00288320712788251
+"14","EMW001","temperature","days","all",1963,"water",0.00288320712788251
+"15","EMW001","temperature","days","all",1964,"water",0.00288320712788251
+"16","EMW001","temperature","days","all",1965,"water",0.00288320712788251
+"17","EMW001","temperature","days","all",1966,"water",0.00288320712788251
+"18","EMW001","temperature","days","all",1967,"water",0.00288320712788251
+"19","EMW001","temperature","days","all",1968,"water",0.00288320712788251
+"20","EMW001","temperature","days","all",1969,"water",0.00288320712788251
+"21","EMW001","temperature","days","all",1970,"water",0.00288320712788251
+"22","EMW001","temperature","days","all",1971,"water",0.00288320712788251
+"23","EMW001","temperature","days","all",1972,"water",0.00288320712788251
+"24","EMW001","temperature","days","all",1973,"water",0.00288320712788251
+"25","EMW001","temperature","days","all",1974,"water",0.00288320712788251
+"26","EMW001","temperature","days","all",1975,"water",0.00288320712788251
+"27","EMW001","temperature","days","all",1976,"water",0.00288320712788251
+"28","EMW001","temperature","days","all",1977,"water",0.00288320712788251
+"29","EMW001","temperature","days","all",1978,"water",0.00288320712788251
+"30","EMW001","temperature","days","all",1979,"water",0.00288320712788251
+"31","EMW001","temperature","days","all",1980,"water",0.00288320712788251
+"32","EMW001","temperature","days","all",1981,"water",0.00288320712788251
+"33","EMW001","temperature","days","all",1982,"water",0.00288320712788251
+"34","EMW001","temperature","days","all",1983,"water",0.00288320712788251
+"35","EMW001","temperature","days","all",1984,"water",0.00288320712788251
+"36","EMW001","temperature","days","all",1985,"water",0.00288320712788251
+"37","EMW001","temperature","days","all",1986,"water",0.00288320712788251
+"38","EMW001","temperature","days","all",1987,"water",0.00288320712788251
+"39","EMW001","temperature","days","all",1988,"water",0.00288320712788251
+"40","EMW001","temperature","days","all",1989,"water",0.00288320712788251
+"41","EMW001","temperature","days","all",1990,"water",0.00288320712788251
+"42","EMW001","temperature","days","all",1991,"water",0.00288320712788251
+"43","EMW001","temperature","days","all",1992,"water",0.00288320712788251
+"44","EMW001","temperature","days","all",1993,"water",0.00288320712788251
+"45","EMW001","temperature","days","all",1994,"water",0.00288320712788251
+"46","EMW001","temperature","days","all",1995,"water",0.00288320712788251
+"47","EMW001","temperature","days","all",1996,"water",0.00288320712788251
+"48","EMW001","temperature","days","all",1997,"water",0.00288320712788251
+"49","EMW001","temperature","days","all",1998,"water",0.00288320712788251
+"50","EMW001","temperature","days","all",1999,"water",0.00288320712788251
+"51","EMW001","temperature","days","all",2000,"water",0.00288320712788251
+"52","EMW001","temperature","days","all",2001,"water",0.00288320712788251
+"53","EMW001","temperature","days","all",2002,"water",0.00288320712788251
+"54","EMW001","temperature","days","all",2003,"water",0.00288320712788251
+"55","HMK011","temperature","C","Poecile montanus",1975,"air",0.0421083549019609
+"56","HMK011","temperature","C","Poecile montanus",1976,"air",0.0421083549019609
+"57","HMK011","temperature","C","Poecile montanus",1977,"air",0.0421083549019609
+"58","HMK011","temperature","C","Poecile montanus",1978,"air",0.0421083549019609
+"59","HMK011","temperature","C","Poecile montanus",1979,"air",0.0421083549019609
+"60","HMK011","temperature","C","Poecile montanus",1980,"air",0.0421083549019609
+"61","HMK011","temperature","C","Poecile montanus",1981,"air",0.0421083549019609
+"62","HMK011","temperature","C","Poecile montanus",1982,"air",0.0421083549019609
+"63","HMK011","temperature","C","Poecile montanus",1983,"air",0.0421083549019609
+"64","HMK011","temperature","C","Poecile montanus",1984,"air",0.0421083549019609
+"65","HMK011","temperature","C","Poecile montanus",1985,"air",0.0421083549019609
+"66","HMK011","temperature","C","Poecile montanus",1986,"air",0.0421083549019609
+"67","HMK011","temperature","C","Poecile montanus",1987,"air",0.0421083549019609
+"68","HMK011","temperature","C","Poecile montanus",1988,"air",0.0421083549019609
+"69","HMK011","temperature","C","Poecile montanus",1989,"air",0.0421083549019609
+"70","HMK011","temperature","C","Poecile montanus",1990,"air",0.0421083549019609
+"71","HMK011","temperature","C","Poecile montanus",1991,"air",0.0421083549019609
+"72","HMK011","temperature","C","Poecile montanus",1992,"air",0.0421083549019609
+"73","HMK011","temperature","C","Poecile montanus",1993,"air",0.0421083549019609
+"74","HMK011","temperature","C","Poecile montanus",1994,"air",0.0421083549019609
+"75","HMK011","temperature","C","Poecile montanus",1995,"air",0.0421083549019609
+"76","HMK011","temperature","C","Poecile montanus",1996,"air",0.0421083549019609
+"77","HMK011","temperature","C","Poecile montanus",1997,"air",0.0421083549019609
+"78","HMK011","temperature","C","Poecile montanus",1998,"air",0.0421083549019609
+"79","HMK011","temperature","C","Poecile montanus",1999,"air",0.0421083549019609
+"80","HMK011","temperature","C","Poecile montanus",2000,"air",0.0421083549019609
+"81","HMK011","temperature","C","Poecile montanus",2001,"air",0.0421083549019609
+"82","HMK011","temperature","C","Poecile montanus",2002,"air",0.0421083549019609
+"83","HMK011","temperature","C","Poecile montanus",2003,"air",0.0421083549019609
+"84","HMK011","temperature","C","Poecile montanus",2004,"air",0.0421083549019609
+"85","HMK011","temperature","C","Poecile montanus",2005,"air",0.0421083549019609
+"86","HMK011","temperature","C","Poecile montanus",2006,"air",0.0421083549019609
+"87","HMK011","temperature","C","Poecile montanus",2007,"air",0.0421083549019609
+"88","HMK011","temperature","C","Poecile montanus",2008,"air",0.0421083549019609
+"89","HMK011","temperature","C","Poecile montanus",2009,"air",0.0421083549019609
+"90","HMK011","temperature","C","Epirrita autumnata",1975,"air",0.0226693955182074
+"91","HMK011","temperature","C","Epirrita autumnata",1976,"air",0.0226693955182074
+"92","HMK011","temperature","C","Epirrita autumnata",1977,"air",0.0226693955182074
+"93","HMK011","temperature","C","Epirrita autumnata",1978,"air",0.0226693955182074
+"94","HMK011","temperature","C","Epirrita autumnata",1979,"air",0.0226693955182074
+"95","HMK011","temperature","C","Epirrita autumnata",1980,"air",0.0226693955182074
+"96","HMK011","temperature","C","Epirrita autumnata",1981,"air",0.0226693955182074
+"97","HMK011","temperature","C","Epirrita autumnata",1982,"air",0.0226693955182074
+"98","HMK011","temperature","C","Epirrita autumnata",1983,"air",0.0226693955182074
+"99","HMK011","temperature","C","Epirrita autumnata",1984,"air",0.0226693955182074
+"100","HMK011","temperature","C","Epirrita autumnata",1985,"air",0.0226693955182074
+"101","HMK011","temperature","C","Epirrita autumnata",1986,"air",0.0226693955182074
+"102","HMK011","temperature","C","Epirrita autumnata",1987,"air",0.0226693955182074
+"103","HMK011","temperature","C","Epirrita autumnata",1988,"air",0.0226693955182074
+"104","HMK011","temperature","C","Epirrita autumnata",1989,"air",0.0226693955182074
+"105","HMK011","temperature","C","Epirrita autumnata",1990,"air",0.0226693955182074
+"106","HMK011","temperature","C","Epirrita autumnata",1991,"air",0.0226693955182074
+"107","HMK011","temperature","C","Epirrita autumnata",1992,"air",0.0226693955182074
+"108","HMK011","temperature","C","Epirrita autumnata",1993,"air",0.0226693955182074
+"109","HMK011","temperature","C","Epirrita autumnata",1994,"air",0.0226693955182074
+"110","HMK011","temperature","C","Epirrita autumnata",1995,"air",0.0226693955182074
+"111","HMK011","temperature","C","Epirrita autumnata",1996,"air",0.0226693955182074
+"112","HMK011","temperature","C","Epirrita autumnata",1997,"air",0.0226693955182074
+"113","HMK011","temperature","C","Epirrita autumnata",1998,"air",0.0226693955182074
+"114","HMK011","temperature","C","Epirrita autumnata",1999,"air",0.0226693955182074
+"115","HMK011","temperature","C","Epirrita autumnata",2000,"air",0.0226693955182074
+"116","HMK011","temperature","C","Epirrita autumnata",2001,"air",0.0226693955182074
+"117","HMK011","temperature","C","Epirrita autumnata",2002,"air",0.0226693955182074
+"118","HMK011","temperature","C","Epirrita autumnata",2003,"air",0.0226693955182074
+"119","HMK011","temperature","C","Epirrita autumnata",2004,"air",0.0226693955182074
+"120","HMK011","temperature","C","Epirrita autumnata",2005,"air",0.0226693955182074
+"121","HMK011","temperature","C","Epirrita autumnata",2006,"air",0.0226693955182074
+"122","HMK011","temperature","C","Epirrita autumnata",2007,"air",0.0226693955182074
+"123","HMK011","temperature","C","Epirrita autumnata",2008,"air",0.0226693955182074
+"124","HMK011","temperature","C","Epirrita autumnata",2009,"air",0.0226693955182074
+"125","HMK016","temperature","C","Cerorhinca monocerata",1985,"air",-0.0114285831168834
+"126","HMK016","temperature","C","Cerorhinca monocerata",1986,"air",-0.0114285831168834
+"127","HMK016","temperature","C","Cerorhinca monocerata",1987,"air",-0.0114285831168834
+"128","HMK016","temperature","C","Cerorhinca monocerata",1988,"air",-0.0114285831168834
+"129","HMK016","temperature","C","Cerorhinca monocerata",1989,"air",-0.0114285831168834
+"130","HMK016","temperature","C","Cerorhinca monocerata",1990,"air",-0.0114285831168834
+"131","HMK016","temperature","C","Cerorhinca monocerata",1991,"air",-0.0114285831168834
+"132","HMK016","temperature","C","Cerorhinca monocerata",1992,"air",-0.0114285831168834
+"133","HMK016","temperature","C","Cerorhinca monocerata",1993,"air",-0.0114285831168834
+"134","HMK016","temperature","C","Cerorhinca monocerata",1994,"air",-0.0114285831168834
+"135","HMK016","temperature","C","Cerorhinca monocerata",1995,"air",-0.0114285831168834
+"136","HMK016","temperature","C","Cerorhinca monocerata",1996,"air",-0.0114285831168834
+"137","HMK016","temperature","C","Cerorhinca monocerata",1997,"air",-0.0114285831168834
+"138","HMK016","temperature","C","Cerorhinca monocerata",1998,"air",-0.0114285831168834
+"139","HMK016","temperature","C","Cerorhinca monocerata",1999,"air",-0.0114285831168834
+"140","HMK016","temperature","C","Cerorhinca monocerata",2000,"air",-0.0114285831168834
+"141","HMK016","temperature","C","Cerorhinca monocerata",2001,"air",-0.0114285831168834
+"142","HMK016","temperature","C","Cerorhinca monocerata",2002,"air",-0.0114285831168834
+"143","HMK016","temperature","C","Cerorhinca monocerata",2003,"air",-0.0114285831168834
+"144","HMK016","temperature","C","Cerorhinca monocerata",2004,"air",-0.0114285831168834
+"145","HMK016","temperature","C","Cerorhinca monocerata",2005,"air",-0.0114285831168834
+"146","HMK018","temperature","C","all",1944,"air",0.0172158820998516
+"147","HMK018","temperature","C","all",1945,"air",0.0172158820998516
+"148","HMK018","temperature","C","all",1946,"air",0.0172158820998516
+"149","HMK018","temperature","C","all",1947,"air",0.0172158820998516
+"150","HMK018","temperature","C","all",1948,"air",0.0172158820998516
+"151","HMK018","temperature","C","all",1949,"air",0.0172158820998516
+"152","HMK018","temperature","C","all",1950,"air",0.0172158820998516
+"153","HMK018","temperature","C","all",1951,"air",0.0172158820998516
+"154","HMK018","temperature","C","all",1952,"air",0.0172158820998516
+"155","HMK018","temperature","C","all",1953,"air",0.0172158820998516
+"156","HMK018","temperature","C","all",1954,"air",0.0172158820998516
+"157","HMK018","temperature","C","all",1955,"air",0.0172158820998516
+"158","HMK018","temperature","C","all",1956,"air",0.0172158820998516
+"159","HMK018","temperature","C","all",1957,"air",0.0172158820998516
+"160","HMK018","temperature","C","all",1958,"air",0.0172158820998516
+"161","HMK018","temperature","C","all",1959,"air",0.0172158820998516
+"162","HMK018","temperature","C","all",1960,"air",0.0172158820998516
+"163","HMK018","temperature","C","all",1961,"air",0.0172158820998516
+"164","HMK018","temperature","C","all",1962,"air",0.0172158820998516
+"165","HMK018","temperature","C","all",1963,"air",0.0172158820998516
+"166","HMK018","temperature","C","all",1964,"air",0.0172158820998516
+"167","HMK018","temperature","C","all",1965,"air",0.0172158820998516
+"168","HMK018","temperature","C","all",1966,"air",0.0172158820998516
+"169","HMK018","temperature","C","all",1967,"air",0.0172158820998516
+"170","HMK018","temperature","C","all",1968,"air",0.0172158820998516
+"171","HMK018","temperature","C","all",1969,"air",0.0172158820998516
+"172","HMK018","temperature","C","all",1970,"air",0.0172158820998516
+"173","HMK018","temperature","C","all",1971,"air",0.0172158820998516
+"174","HMK018","temperature","C","all",1972,"air",0.0172158820998516
+"175","HMK018","temperature","C","all",1973,"air",0.0172158820998516
+"176","HMK018","temperature","C","all",1974,"air",0.0172158820998516
+"177","HMK018","temperature","C","all",1975,"air",0.0172158820998516
+"178","HMK018","temperature","C","all",1976,"air",0.0172158820998516
+"179","HMK018","temperature","C","all",1977,"air",0.0172158820998516
+"180","HMK018","temperature","C","all",1978,"air",0.0172158820998516
+"181","HMK018","temperature","C","all",1979,"air",0.0172158820998516
+"182","HMK018","temperature","C","all",1980,"air",0.0172158820998516
+"183","HMK018","temperature","C","all",1981,"air",0.0172158820998516
+"184","HMK018","temperature","C","all",1982,"air",0.0172158820998516
+"185","HMK018","temperature","C","all",1983,"air",0.0172158820998516
+"186","HMK018","temperature","C","all",1984,"air",0.0172158820998516
+"187","HMK018","temperature","C","all",1985,"air",0.0172158820998516
+"188","HMK018","temperature","C","all",1986,"air",0.0172158820998516
+"189","HMK018","temperature","C","all",1987,"air",0.0172158820998516
+"190","HMK018","temperature","C","all",1988,"air",0.0172158820998516
+"191","HMK018","temperature","C","all",1989,"air",0.0172158820998516
+"192","HMK018","temperature","C","all",1990,"air",0.0172158820998516
+"193","HMK018","temperature","C","all",1991,"air",0.0172158820998516
+"194","HMK018","temperature","C","all",1992,"air",0.0172158820998516
+"195","HMK018","temperature","C","all",1993,"air",0.0172158820998516
+"196","HMK018","temperature","C","all",1994,"air",0.0172158820998516
+"197","HMK018","temperature","C","all",1995,"air",0.0172158820998516
+"198","HMK018","temperature","C","all",1996,"air",0.0172158820998516
+"199","HMK018","temperature","C","all",1997,"air",0.0172158820998516
+"200","HMK018","temperature","C","all",1998,"air",0.0172158820998516
+"201","HMK018","temperature","C","all",1999,"air",0.0172158820998516
+"202","HMK018","temperature","C","all",2000,"air",0.0172158820998516
+"203","HMK018","temperature","C","all",2001,"air",0.0172158820998516
+"204","HMK018","temperature","C","all",2002,"air",0.0172158820998516
+"205","HMK018","temperature","C","all",2003,"air",0.0172158820998516
+"206","HMK018","temperature","C","all",2004,"air",0.0172158820998516
+"207","HMK018","temperature","C","all",2005,"air",0.0172158820998516
+"208","HMK018","temperature","C","all",2006,"air",0.0172158820998516
+"209","HMK018","temperature","C","all",2007,"air",0.0172158820998516
+"210","HMK018","temperature","C","all",1944,"air",0.0172158820998516
+"211","HMK018","temperature","C","all",1945,"air",0.0172158820998516
+"212","HMK018","temperature","C","all",1946,"air",0.0172158820998516
+"213","HMK018","temperature","C","all",1947,"air",0.0172158820998516
+"214","HMK018","temperature","C","all",1948,"air",0.0172158820998516
+"215","HMK018","temperature","C","all",1949,"air",0.0172158820998516
+"216","HMK018","temperature","C","all",1950,"air",0.0172158820998516
+"217","HMK018","temperature","C","all",1951,"air",0.0172158820998516
+"218","HMK018","temperature","C","all",1952,"air",0.0172158820998516
+"219","HMK018","temperature","C","all",1953,"air",0.0172158820998516
+"220","HMK018","temperature","C","all",1954,"air",0.0172158820998516
+"221","HMK018","temperature","C","all",1955,"air",0.0172158820998516
+"222","HMK018","temperature","C","all",1956,"air",0.0172158820998516
+"223","HMK018","temperature","C","all",1957,"air",0.0172158820998516
+"224","HMK018","temperature","C","all",1958,"air",0.0172158820998516
+"225","HMK018","temperature","C","all",1959,"air",0.0172158820998516
+"226","HMK018","temperature","C","all",1960,"air",0.0172158820998516
+"227","HMK018","temperature","C","all",1961,"air",0.0172158820998516
+"228","HMK018","temperature","C","all",1962,"air",0.0172158820998516
+"229","HMK018","temperature","C","all",1963,"air",0.0172158820998516
+"230","HMK018","temperature","C","all",1964,"air",0.0172158820998516
+"231","HMK018","temperature","C","all",1965,"air",0.0172158820998516
+"232","HMK018","temperature","C","all",1966,"air",0.0172158820998516
+"233","HMK018","temperature","C","all",1967,"air",0.0172158820998516
+"234","HMK018","temperature","C","all",1968,"air",0.0172158820998516
+"235","HMK018","temperature","C","all",1969,"air",0.0172158820998516
+"236","HMK018","temperature","C","all",1970,"air",0.0172158820998516
+"237","HMK018","temperature","C","all",1971,"air",0.0172158820998516
+"238","HMK018","temperature","C","all",1972,"air",0.0172158820998516
+"239","HMK018","temperature","C","all",1973,"air",0.0172158820998516
+"240","HMK018","temperature","C","all",1974,"air",0.0172158820998516
+"241","HMK018","temperature","C","all",1975,"air",0.0172158820998516
+"242","HMK018","temperature","C","all",1976,"air",0.0172158820998516
+"243","HMK018","temperature","C","all",1977,"air",0.0172158820998516
+"244","HMK018","temperature","C","all",1978,"air",0.0172158820998516
+"245","HMK018","temperature","C","all",1979,"air",0.0172158820998516
+"246","HMK018","temperature","C","all",1980,"air",0.0172158820998516
+"247","HMK018","temperature","C","all",1981,"air",0.0172158820998516
+"248","HMK018","temperature","C","all",1982,"air",0.0172158820998516
+"249","HMK018","temperature","C","all",1983,"air",0.0172158820998516
+"250","HMK018","temperature","C","all",1984,"air",0.0172158820998516
+"251","HMK018","temperature","C","all",1985,"air",0.0172158820998516
+"252","HMK018","temperature","C","all",1986,"air",0.0172158820998516
+"253","HMK018","temperature","C","all",1987,"air",0.0172158820998516
+"254","HMK018","temperature","C","all",1988,"air",0.0172158820998516
+"255","HMK018","temperature","C","all",1989,"air",0.0172158820998516
+"256","HMK018","temperature","C","all",1990,"air",0.0172158820998516
+"257","HMK018","temperature","C","all",1991,"air",0.0172158820998516
+"258","HMK018","temperature","C","all",1992,"air",0.0172158820998516
+"259","HMK018","temperature","C","all",1993,"air",0.0172158820998516
+"260","HMK018","temperature","C","all",1994,"air",0.0172158820998516
+"261","HMK018","temperature","C","all",1995,"air",0.0172158820998516
+"262","HMK018","temperature","C","all",1996,"air",0.0172158820998516
+"263","HMK018","temperature","C","all",1997,"air",0.0172158820998516
+"264","HMK018","temperature","C","all",1998,"air",0.0172158820998516
+"265","HMK018","temperature","C","all",1999,"air",0.0172158820998516
+"266","HMK018","temperature","C","all",2000,"air",0.0172158820998516
+"267","HMK018","temperature","C","all",2001,"air",0.0172158820998516
+"268","HMK018","temperature","C","all",2002,"air",0.0172158820998516
+"269","HMK018","temperature","C","all",2003,"air",0.0172158820998516
+"270","HMK018","temperature","C","all",2004,"air",0.0172158820998516
+"271","HMK018","temperature","C","all",2005,"air",0.0172158820998516
+"272","HMK018","temperature","C","all",2006,"air",0.0172158820998516
+"273","HMK018","temperature","C","all",2007,"air",0.0172158820998516
+"274","HMK019","temperature","C","Phytoplankton1 spp.",1969,"water",0.0394542953533508
+"275","HMK019","temperature","C","Phytoplankton1 spp.",1970,"water",0.0394542953533508
+"276","HMK019","temperature","C","Phytoplankton1 spp.",1971,"water",0.0394542953533508
+"277","HMK019","temperature","C","Phytoplankton1 spp.",1972,"water",0.0394542953533508
+"278","HMK019","temperature","C","Phytoplankton1 spp.",1973,"water",0.0394542953533508
+"279","HMK019","temperature","C","Phytoplankton1 spp.",1974,"water",0.0394542953533508
+"280","HMK019","temperature","C","Phytoplankton1 spp.",1975,"water",0.0394542953533508
+"281","HMK019","temperature","C","Phytoplankton1 spp.",1976,"water",0.0394542953533508
+"282","HMK019","temperature","C","Phytoplankton1 spp.",1977,"water",0.0394542953533508
+"283","HMK019","temperature","C","Phytoplankton1 spp.",1978,"water",0.0394542953533508
+"284","HMK019","temperature","C","Phytoplankton1 spp.",1979,"water",0.0394542953533508
+"285","HMK019","temperature","C","Phytoplankton1 spp.",1980,"water",0.0394542953533508
+"286","HMK019","temperature","C","Phytoplankton1 spp.",1981,"water",0.0394542953533508
+"287","HMK019","temperature","C","Phytoplankton1 spp.",1982,"water",0.0394542953533508
+"288","HMK019","temperature","C","Phytoplankton1 spp.",1983,"water",0.0394542953533508
+"289","HMK019","temperature","C","Phytoplankton1 spp.",1984,"water",0.0394542953533508
+"290","HMK019","temperature","C","Phytoplankton1 spp.",1985,"water",0.0394542953533508
+"291","HMK019","temperature","C","Phytoplankton1 spp.",1986,"water",0.0394542953533508
+"292","HMK019","temperature","C","Phytoplankton1 spp.",1987,"water",0.0394542953533508
+"293","HMK019","temperature","C","Phytoplankton1 spp.",1988,"water",0.0394542953533508
+"294","HMK019","temperature","C","Phytoplankton1 spp.",1989,"water",0.0394542953533508
+"295","HMK019","temperature","C","Phytoplankton1 spp.",1990,"water",0.0394542953533508
+"296","HMK019","temperature","C","Phytoplankton1 spp.",1991,"water",0.0394542953533508
+"297","HMK019","temperature","C","Phytoplankton1 spp.",1992,"water",0.0394542953533508
+"298","HMK019","temperature","C","Phytoplankton1 spp.",1993,"water",0.0394542953533508
+"299","HMK019","temperature","C","Phytoplankton1 spp.",1994,"water",0.0394542953533508
+"300","HMK019","temperature","C","Phytoplankton1 spp.",1995,"water",0.0394542953533508
+"301","HMK019","temperature","C","Phytoplankton1 spp.",1996,"water",0.0394542953533508
+"302","HMK019","temperature","C","Phytoplankton1 spp.",1997,"water",0.0394542953533508
+"303","HMK019","temperature","C","Phytoplankton1 spp.",1998,"water",0.0394542953533508
+"304","HMK019","temperature","C","Phytoplankton1 spp.",1999,"water",0.0394542953533508
+"305","HMK019","temperature","C","Phytoplankton1 spp.",2000,"water",0.0394542953533508
+"306","HMK019","temperature","C","Phytoplankton1 spp.",2001,"water",0.0394542953533508
+"307","HMK019","temperature","C","Phytoplankton1 spp.",2002,"water",0.0394542953533508
+"308","HMK019","temperature","C","Phytoplankton1 spp.",2003,"water",0.0394542953533508
+"309","HMK019","temperature","C","Phytoplankton1 spp.",2004,"water",0.0394542953533508
+"310","HMK019","temperature","C","Phytoplankton1 spp.",2005,"water",0.0394542953533508
+"311","HMK019","temperature","C","Phytoplankton1 spp.",2006,"water",0.0394542953533508
+"312","HMK019","temperature","C","Phytoplankton1 spp.",2007,"water",0.0394542953533508
+"313","HMK019","temperature","C","Phytoplankton1 spp.",2008,"water",0.0394542953533508
+"314","HMK019","temperature","C","Phytoplankton1 spp.",1969,"water",0.0394542953533508
+"315","HMK019","temperature","C","Phytoplankton1 spp.",1970,"water",0.0394542953533508
+"316","HMK019","temperature","C","Phytoplankton1 spp.",1971,"water",0.0394542953533508
+"317","HMK019","temperature","C","Phytoplankton1 spp.",1972,"water",0.0394542953533508
+"318","HMK019","temperature","C","Phytoplankton1 spp.",1973,"water",0.0394542953533508
+"319","HMK019","temperature","C","Phytoplankton1 spp.",1974,"water",0.0394542953533508
+"320","HMK019","temperature","C","Phytoplankton1 spp.",1975,"water",0.0394542953533508
+"321","HMK019","temperature","C","Phytoplankton1 spp.",1976,"water",0.0394542953533508
+"322","HMK019","temperature","C","Phytoplankton1 spp.",1977,"water",0.0394542953533508
+"323","HMK019","temperature","C","Phytoplankton1 spp.",1978,"water",0.0394542953533508
+"324","HMK019","temperature","C","Phytoplankton1 spp.",1980,"water",0.0394542953533508
+"325","HMK019","temperature","C","Phytoplankton1 spp.",1981,"water",0.0394542953533508
+"326","HMK019","temperature","C","Phytoplankton1 spp.",1982,"water",0.0394542953533508
+"327","HMK019","temperature","C","Phytoplankton1 spp.",1983,"water",0.0394542953533508
+"328","HMK019","temperature","C","Phytoplankton1 spp.",1984,"water",0.0394542953533508
+"329","HMK019","temperature","C","Phytoplankton1 spp.",1985,"water",0.0394542953533508
+"330","HMK019","temperature","C","Phytoplankton1 spp.",1986,"water",0.0394542953533508
+"331","HMK019","temperature","C","Phytoplankton1 spp.",1987,"water",0.0394542953533508
+"332","HMK019","temperature","C","Phytoplankton1 spp.",1988,"water",0.0394542953533508
+"333","HMK019","temperature","C","Phytoplankton1 spp.",1989,"water",0.0394542953533508
+"334","HMK019","temperature","C","Phytoplankton1 spp.",1990,"water",0.0394542953533508
+"335","HMK019","temperature","C","Phytoplankton1 spp.",1991,"water",0.0394542953533508
+"336","HMK019","temperature","C","Phytoplankton1 spp.",1992,"water",0.0394542953533508
+"337","HMK019","temperature","C","Phytoplankton1 spp.",1993,"water",0.0394542953533508
+"338","HMK019","temperature","C","Phytoplankton1 spp.",1994,"water",0.0394542953533508
+"339","HMK019","temperature","C","Phytoplankton1 spp.",1995,"water",0.0394542953533508
+"340","HMK019","temperature","C","Phytoplankton1 spp.",1996,"water",0.0394542953533508
+"341","HMK019","temperature","C","Phytoplankton1 spp.",1997,"water",0.0394542953533508
+"342","HMK019","temperature","C","Phytoplankton1 spp.",1998,"water",0.0394542953533508
+"343","HMK019","temperature","C","Phytoplankton1 spp.",1999,"water",0.0394542953533508
+"344","HMK019","temperature","C","Phytoplankton1 spp.",2000,"water",0.0394542953533508
+"345","HMK019","temperature","C","Phytoplankton1 spp.",2001,"water",0.0394542953533508
+"346","HMK019","temperature","C","Phytoplankton1 spp.",2002,"water",0.0394542953533508
+"347","HMK019","temperature","C","Phytoplankton1 spp.",2003,"water",0.0394542953533508
+"348","HMK019","temperature","C","Phytoplankton1 spp.",2004,"water",0.0394542953533508
+"349","HMK019","temperature","C","Phytoplankton1 spp.",2005,"water",0.0394542953533508
+"350","HMK019","temperature","C","Phytoplankton1 spp.",2006,"water",0.0394542953533508
+"351","HMK019","temperature","C","Phytoplankton1 spp.",2007,"water",0.0394542953533508
+"352","HMK019","temperature","C","Phytoplankton1 spp.",2008,"water",0.0394542953533508
+"353","HMK019","temperature","C","Phytoplankton1 spp.",1969,"water",0.0394542953533508
+"354","HMK019","temperature","C","Perca fluviatillis",1970,"water",0.0427817865853658
+"355","HMK019","temperature","C","Perca fluviatillis",1971,"water",0.0427817865853658
+"356","HMK019","temperature","C","Perca fluviatillis",1972,"water",0.0427817865853658
+"357","HMK019","temperature","C","Perca fluviatillis",1973,"water",0.0427817865853658
+"358","HMK019","temperature","C","Perca fluviatillis",1974,"water",0.0427817865853658
+"359","HMK019","temperature","C","Perca fluviatillis",1975,"water",0.0427817865853658
+"360","HMK019","temperature","C","Perca fluviatillis",1976,"water",0.0427817865853658
+"361","HMK019","temperature","C","Perca fluviatillis",1977,"water",0.0427817865853658
+"362","HMK019","temperature","C","Perca fluviatillis",1978,"water",0.0427817865853658
+"363","HMK019","temperature","C","Perca fluviatillis",1979,"water",0.0427817865853658
+"364","HMK019","temperature","C","Perca fluviatillis",1980,"water",0.0427817865853658
+"365","HMK019","temperature","C","Perca fluviatillis",1981,"water",0.0427817865853658
+"366","HMK019","temperature","C","Perca fluviatillis",1982,"water",0.0427817865853658
+"367","HMK019","temperature","C","Perca fluviatillis",1983,"water",0.0427817865853658
+"368","HMK019","temperature","C","Perca fluviatillis",1984,"water",0.0427817865853658
+"369","HMK019","temperature","C","Perca fluviatillis",1985,"water",0.0427817865853658
+"370","HMK019","temperature","C","Perca fluviatillis",1986,"water",0.0427817865853658
+"371","HMK019","temperature","C","Perca fluviatillis",1987,"water",0.0427817865853658
+"372","HMK019","temperature","C","Perca fluviatillis",1988,"water",0.0427817865853658
+"373","HMK019","temperature","C","Perca fluviatillis",1989,"water",0.0427817865853658
+"374","HMK019","temperature","C","Perca fluviatillis",1990,"water",0.0427817865853658
+"375","HMK019","temperature","C","Perca fluviatillis",1991,"water",0.0427817865853658
+"376","HMK019","temperature","C","Perca fluviatillis",1992,"water",0.0427817865853658
+"377","HMK019","temperature","C","Perca fluviatillis",1993,"water",0.0427817865853658
+"378","HMK019","temperature","C","Perca fluviatillis",1994,"water",0.0427817865853658
+"379","HMK019","temperature","C","Perca fluviatillis",1995,"water",0.0427817865853658
+"380","HMK019","temperature","C","Perca fluviatillis",1996,"water",0.0427817865853658
+"381","HMK019","temperature","C","Perca fluviatillis",1997,"water",0.0427817865853658
+"382","HMK019","temperature","C","Perca fluviatillis",1998,"water",0.0427817865853658
+"383","HMK019","temperature","C","Perca fluviatillis",1999,"water",0.0427817865853658
+"384","HMK019","temperature","C","Perca fluviatillis",2000,"water",0.0427817865853658
+"385","HMK019","temperature","C","Perca fluviatillis",2001,"water",0.0427817865853658
+"386","HMK019","temperature","C","Perca fluviatillis",2002,"water",0.0427817865853658
+"387","HMK019","temperature","C","Perca fluviatillis",2003,"water",0.0427817865853658
+"388","HMK019","temperature","C","Perca fluviatillis",2004,"water",0.0427817865853658
+"389","HMK019","temperature","C","Perca fluviatillis",2005,"water",0.0427817865853658
+"390","HMK019","temperature","C","Perca fluviatillis",2006,"water",0.0427817865853658
+"391","HMK019","temperature","C","Perca fluviatillis",2007,"water",0.0427817865853658
+"392","HMK019","temperature","C","Perca fluviatillis",2008,"water",0.0427817865853658
+"393","HMK019","temperature","C","Perca fluviatillis",1969,"water",0.0427817865853658
+"394","HMK019","temperature","C","Perca fluviatillis",1970,"water",0.0427817865853658
+"395","HMK019","temperature","C","Perca fluviatillis",1971,"water",0.0427817865853658
+"396","HMK019","temperature","C","Perca fluviatillis",1972,"water",0.0427817865853658
+"397","HMK019","temperature","C","Perca fluviatillis",1973,"water",0.0427817865853658
+"398","HMK019","temperature","C","Perca fluviatillis",1974,"water",0.0427817865853658
+"399","HMK019","temperature","C","Perca fluviatillis",1975,"water",0.0427817865853658
+"400","HMK019","temperature","C","Perca fluviatillis",1976,"water",0.0427817865853658
+"401","HMK019","temperature","C","Perca fluviatillis",1977,"water",0.0427817865853658
+"402","HMK019","temperature","C","Perca fluviatillis",1978,"water",0.0427817865853658
+"403","HMK019","temperature","C","Perca fluviatillis",1979,"water",0.0427817865853658
+"404","HMK019","temperature","C","Perca fluviatillis",1980,"water",0.0427817865853658
+"405","HMK019","temperature","C","Perca fluviatillis",1981,"water",0.0427817865853658
+"406","HMK019","temperature","C","Perca fluviatillis",1982,"water",0.0427817865853658
+"407","HMK019","temperature","C","Perca fluviatillis",1983,"water",0.0427817865853658
+"408","HMK019","temperature","C","Perca fluviatillis",1984,"water",0.0427817865853658
+"409","HMK019","temperature","C","Perca fluviatillis",1985,"water",0.0427817865853658
+"410","HMK019","temperature","C","Perca fluviatillis",1986,"water",0.0427817865853658
+"411","HMK019","temperature","C","Perca fluviatillis",1987,"water",0.0427817865853658
+"412","HMK019","temperature","C","Perca fluviatillis",1988,"water",0.0427817865853658
+"413","HMK019","temperature","C","Perca fluviatillis",1989,"water",0.0427817865853658
+"414","HMK019","temperature","C","Perca fluviatillis",1990,"water",0.0427817865853658
+"415","HMK019","temperature","C","Perca fluviatillis",1991,"water",0.0427817865853658
+"416","HMK019","temperature","C","Perca fluviatillis",1992,"water",0.0427817865853658
+"417","HMK019","temperature","C","Perca fluviatillis",1993,"water",0.0427817865853658
+"418","HMK019","temperature","C","Perca fluviatillis",1994,"water",0.0427817865853658
+"419","HMK019","temperature","C","Perca fluviatillis",1995,"water",0.0427817865853658
+"420","HMK019","temperature","C","Perca fluviatillis",1996,"water",0.0427817865853658
+"421","HMK019","temperature","C","Perca fluviatillis",1997,"water",0.0427817865853658
+"422","HMK019","temperature","C","Perca fluviatillis",1998,"water",0.0427817865853658
+"423","HMK019","temperature","C","Perca fluviatillis",1999,"water",0.0427817865853658
+"424","HMK019","temperature","C","Perca fluviatillis",2000,"water",0.0427817865853658
+"425","HMK019","temperature","C","Perca fluviatillis",2001,"water",0.0427817865853658
+"426","HMK019","temperature","C","Perca fluviatillis",2002,"water",0.0427817865853658
+"427","HMK019","temperature","C","Perca fluviatillis",2003,"water",0.0427817865853658
+"428","HMK019","temperature","C","Perca fluviatillis",2004,"water",0.0427817865853658
+"429","HMK019","temperature","C","Perca fluviatillis",2005,"water",0.0427817865853658
+"430","HMK019","temperature","C","Perca fluviatillis",2006,"water",0.0427817865853658
+"431","HMK019","temperature","C","Perca fluviatillis",2007,"water",0.0427817865853658
+"432","HMK019","temperature","C","Perca fluviatillis",2008,"water",0.0427817865853658
+"433","HMK019","temperature","C","Perca fluviatillis",1969,"water",0.0427817865853658
+"434","HMK019","temperature","C","Daphnia3 spp.",1970,"water",0.0427817865853658
+"435","HMK019","temperature","C","Daphnia3 spp.",1971,"water",0.0427817865853658
+"436","HMK019","temperature","C","Daphnia3 spp.",1972,"water",0.0427817865853658
+"437","HMK019","temperature","C","Daphnia3 spp.",1973,"water",0.0427817865853658
+"438","HMK019","temperature","C","Daphnia3 spp.",1974,"water",0.0427817865853658
+"439","HMK019","temperature","C","Daphnia3 spp.",1975,"water",0.0427817865853658
+"440","HMK019","temperature","C","Daphnia3 spp.",1976,"water",0.0427817865853658
+"441","HMK019","temperature","C","Daphnia3 spp.",1977,"water",0.0427817865853658
+"442","HMK019","temperature","C","Daphnia3 spp.",1978,"water",0.0427817865853658
+"443","HMK019","temperature","C","Daphnia3 spp.",1979,"water",0.0427817865853658
+"444","HMK019","temperature","C","Daphnia3 spp.",1980,"water",0.0427817865853658
+"445","HMK019","temperature","C","Daphnia3 spp.",1981,"water",0.0427817865853658
+"446","HMK019","temperature","C","Daphnia3 spp.",1982,"water",0.0427817865853658
+"447","HMK019","temperature","C","Daphnia3 spp.",1983,"water",0.0427817865853658
+"448","HMK019","temperature","C","Daphnia3 spp.",1984,"water",0.0427817865853658
+"449","HMK019","temperature","C","Daphnia3 spp.",1985,"water",0.0427817865853658
+"450","HMK019","temperature","C","Daphnia3 spp.",1986,"water",0.0427817865853658
+"451","HMK019","temperature","C","Daphnia3 spp.",1987,"water",0.0427817865853658
+"452","HMK019","temperature","C","Daphnia3 spp.",1988,"water",0.0427817865853658
+"453","HMK019","temperature","C","Daphnia3 spp.",1989,"water",0.0427817865853658
+"454","HMK019","temperature","C","Daphnia3 spp.",1990,"water",0.0427817865853658
+"455","HMK019","temperature","C","Daphnia3 spp.",1991,"water",0.0427817865853658
+"456","HMK019","temperature","C","Daphnia3 spp.",1992,"water",0.0427817865853658
+"457","HMK019","temperature","C","Daphnia3 spp.",1993,"water",0.0427817865853658
+"458","HMK019","temperature","C","Daphnia3 spp.",1994,"water",0.0427817865853658
+"459","HMK019","temperature","C","Daphnia3 spp.",1995,"water",0.0427817865853658
+"460","HMK019","temperature","C","Daphnia3 spp.",1996,"water",0.0427817865853658
+"461","HMK019","temperature","C","Daphnia3 spp.",1997,"water",0.0427817865853658
+"462","HMK019","temperature","C","Daphnia3 spp.",1998,"water",0.0427817865853658
+"463","HMK019","temperature","C","Daphnia3 spp.",1999,"water",0.0427817865853658
+"464","HMK019","temperature","C","Daphnia3 spp.",2000,"water",0.0427817865853658
+"465","HMK019","temperature","C","Daphnia3 spp.",2001,"water",0.0427817865853658
+"466","HMK019","temperature","C","Daphnia3 spp.",2002,"water",0.0427817865853658
+"467","HMK019","temperature","C","Daphnia3 spp.",2003,"water",0.0427817865853658
+"468","HMK019","temperature","C","Daphnia3 spp.",2004,"water",0.0427817865853658
+"469","HMK019","temperature","C","Daphnia3 spp.",2005,"water",0.0427817865853658
+"470","HMK019","temperature","C","Daphnia3 spp.",2006,"water",0.0427817865853658
+"471","HMK019","temperature","C","Daphnia3 spp.",2007,"water",0.0427817865853658
+"472","HMK019","temperature","C","Daphnia3 spp.",2008,"water",0.0427817865853658
+"473","HMK019","temperature","C","Daphnia3 spp.",1969,"water",0.0427817865853658
+"474","HMK019","temperature","C","Daphnia3 spp.",1970,"water",0.0427817865853658
+"475","HMK019","temperature","C","Daphnia3 spp.",1971,"water",0.0427817865853658
+"476","HMK019","temperature","C","Daphnia3 spp.",1972,"water",0.0427817865853658
+"477","HMK019","temperature","C","Daphnia3 spp.",1973,"water",0.0427817865853658
+"478","HMK019","temperature","C","Daphnia3 spp.",1974,"water",0.0427817865853658
+"479","HMK019","temperature","C","Daphnia3 spp.",1975,"water",0.0427817865853658
+"480","HMK019","temperature","C","Daphnia3 spp.",1976,"water",0.0427817865853658
+"481","HMK019","temperature","C","Daphnia3 spp.",1977,"water",0.0427817865853658
+"482","HMK019","temperature","C","Daphnia3 spp.",1978,"water",0.0427817865853658
+"483","HMK019","temperature","C","Daphnia3 spp.",1979,"water",0.0427817865853658
+"484","HMK019","temperature","C","Daphnia3 spp.",1980,"water",0.0427817865853658
+"485","HMK019","temperature","C","Daphnia3 spp.",1981,"water",0.0427817865853658
+"486","HMK019","temperature","C","Daphnia3 spp.",1982,"water",0.0427817865853658
+"487","HMK019","temperature","C","Daphnia3 spp.",1983,"water",0.0427817865853658
+"488","HMK019","temperature","C","Daphnia3 spp.",1984,"water",0.0427817865853658
+"489","HMK019","temperature","C","Daphnia3 spp.",1985,"water",0.0427817865853658
+"490","HMK019","temperature","C","Daphnia3 spp.",1986,"water",0.0427817865853658
+"491","HMK019","temperature","C","Daphnia3 spp.",1987,"water",0.0427817865853658
+"492","HMK019","temperature","C","Daphnia3 spp.",1988,"water",0.0427817865853658
+"493","HMK019","temperature","C","Daphnia3 spp.",1989,"water",0.0427817865853658
+"494","HMK019","temperature","C","Daphnia3 spp.",1990,"water",0.0427817865853658
+"495","HMK019","temperature","C","Daphnia3 spp.",1991,"water",0.0427817865853658
+"496","HMK019","temperature","C","Daphnia3 spp.",1992,"water",0.0427817865853658
+"497","HMK019","temperature","C","Daphnia3 spp.",1993,"water",0.0427817865853658
+"498","HMK019","temperature","C","Daphnia3 spp.",1994,"water",0.0427817865853658
+"499","HMK019","temperature","C","Daphnia3 spp.",1995,"water",0.0427817865853658
+"500","HMK019","temperature","C","Daphnia3 spp.",1996,"water",0.0427817865853658
+"501","HMK019","temperature","C","Daphnia3 spp.",1997,"water",0.0427817865853658
+"502","HMK019","temperature","C","Daphnia3 spp.",1998,"water",0.0427817865853658
+"503","HMK019","temperature","C","Daphnia3 spp.",1999,"water",0.0427817865853658
+"504","HMK019","temperature","C","Daphnia3 spp.",2000,"water",0.0427817865853658
+"505","HMK019","temperature","C","Daphnia3 spp.",2001,"water",0.0427817865853658
+"506","HMK019","temperature","C","Daphnia3 spp.",2002,"water",0.0427817865853658
+"507","HMK019","temperature","C","Daphnia3 spp.",2003,"water",0.0427817865853658
+"508","HMK019","temperature","C","Daphnia3 spp.",2004,"water",0.0427817865853658
+"509","HMK019","temperature","C","Daphnia3 spp.",2005,"water",0.0427817865853658
+"510","HMK019","temperature","C","Daphnia3 spp.",2006,"water",0.0427817865853658
+"511","HMK019","temperature","C","Daphnia3 spp.",2007,"water",0.0427817865853658
+"512","HMK019","temperature","C","Daphnia3 spp.",2008,"water",0.0427817865853658
+"513","HMK019","temperature","C","Daphnia3 spp.",1969,"water",0.0427817865853658
+"514","HMK023","snowmelt","doy","all",1999,"ground",0.339560439560454
+"515","HMK023","snowmelt","doy","all",2000,"ground",0.339560439560454
+"516","HMK023","snowmelt","doy","all",2001,"ground",0.339560439560454
+"517","HMK023","snowmelt","doy","all",2002,"ground",0.339560439560454
+"518","HMK023","snowmelt","doy","all",2003,"ground",0.339560439560454
+"519","HMK023","snowmelt","doy","all",2004,"ground",0.339560439560454
+"520","HMK023","snowmelt","doy","all",2005,"ground",0.339560439560454
+"521","HMK023","snowmelt","doy","all",2006,"ground",0.339560439560454
+"522","HMK023","snowmelt","doy","all",2007,"ground",0.339560439560454
+"523","HMK023","snowmelt","doy","all",2008,"ground",0.339560439560454
+"524","HMK023","snowmelt","doy","all",2009,"ground",0.339560439560454
+"525","HMK023","snowmelt","doy","all",2010,"ground",0.339560439560454
+"526","HMK023","snowmelt","doy","all",2011,"ground",0.339560439560454
+"527","HMK023","snowmelt","doy","all",2012,"ground",0.339560439560454
+"528","HMK023","snowmelt","doy","all",1999,"ground",0.339560439560454
+"529","HMK023","snowmelt","doy","all",2000,"ground",0.339560439560454
+"530","HMK023","snowmelt","doy","all",2001,"ground",0.339560439560454
+"531","HMK023","snowmelt","doy","all",2002,"ground",0.339560439560454
+"532","HMK023","snowmelt","doy","all",2003,"ground",0.339560439560454
+"533","HMK023","snowmelt","doy","all",2004,"ground",0.339560439560454
+"534","HMK023","snowmelt","doy","all",2005,"ground",0.339560439560454
+"535","HMK023","snowmelt","doy","all",2006,"ground",0.339560439560454
+"536","HMK023","snowmelt","doy","all",2007,"ground",0.339560439560454
+"537","HMK023","snowmelt","doy","all",2008,"ground",0.339560439560454
+"538","HMK023","snowmelt","doy","all",2009,"ground",0.339560439560454
+"539","HMK023","snowmelt","doy","all",2010,"ground",0.339560439560454
+"540","HMK023","snowmelt","doy","all",2011,"ground",0.339560439560454
+"541","HMK023","snowmelt","doy","all",2012,"ground",0.339560439560454
+"542","15","","","",NA,"",0
+"543","15","","","",NA,"",0
+"544","15","","","",NA,"",0
+"545","15","","","",NA,"",0
