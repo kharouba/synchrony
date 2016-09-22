@@ -96,6 +96,8 @@ sub17$datasetid<-with(sub17, paste(studyid,"_",17))
 sub18<-subset(clim3, studyid=="HMK042" & species=="Acrocephalus arundinaceus")
 sub18$datasetid<-with(sub18, paste(studyid,"_",18))
 
+dataset<-rbind(sub1, sub2, sub3, sub4, sub5, sub6, sub7, sub8, sub9, sub10,
+    sub11, sub12, sub13, sub14, sub15, sub16, sub17, sub18)
 
 # Now! make a list of what datasetid each species belongs to, without dropping any species
 # (note that we did drop species to make dataset)

@@ -67,7 +67,7 @@ intid.nodups <- intid.sm[!duplicated(intid.sm),]
 temp_int <- intid.nodups #temp change interactions
 temp_int <- temp_int[with(temp_int,order(intid)),]
 
-unique(temp_int[,c("species", "datasetid")])
+unique(temp_int[,c("datasetid")])
 
 # Increase iterations someday!
 # Get means for all interactions, including ...

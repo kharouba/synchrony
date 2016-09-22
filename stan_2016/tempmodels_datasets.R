@@ -1,6 +1,8 @@
 ### to get absolute value of temperature change (i.e. based on unique datasets) ###
 
 rm(list=ls())
+options(stringsAsFactors=FALSE)
+
 #row.names=FALSE
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 # setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
