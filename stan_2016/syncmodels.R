@@ -40,9 +40,11 @@ specieschar <- aggregate(specieschar.wdups["phenovalue"],
 # and order it!
 rawlong.nodups<-rawlong
 rawlong.nodups <- rawlong.nodups[with(rawlong.nodups, order(species, year)),]
-specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
-    rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
- specieschar.formodel <- specieschar.formodel[with(specieschar.formodel, order(species)),]   
+#rawlong.nodups$newid<-with(rawlong.nodups, paste(intid,"_",species))
+#rawlong.nodups <- rawlong.tot[with(rawlong.nodups, order(newid)),]
+#specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
+  #  rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
+ #specieschar.formodel <- specieschar.formodel[with(specieschar.formodel, order(species)),]   
 
 #number of years per species
     
@@ -72,19 +74,21 @@ rawlong.tot<-rbind(hinge_non, hinges)
 # prep the data to fit the model including:
 # aggregate to get species level characteristics
 # subset down to the phenovalues
-
+# Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
-rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
+rawlong.tot <- rawlong.tot[with(rawlong.tot, order(intid)),]
+rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
+rawlong.tot <- rawlong.tot[with(rawlong.tot, order(intid, species)),]
 N <- nrow(rawlong.tot)
 y <- rawlong.tot$phenovalue
-specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-specieschar.hin2<-unique(specieschar.hin$species)
-Nspp <- length(specieschar.hin2)
-species <- as.numeric(as.factor(rawlong.tot$species))
+Nspp <- length(unique(rawlong.tot$newid)) #newid is character !
+species <- as.numeric(as.factor(rawlong.tot$newid))
 year <- rawlong.tot$yr1981
-#nVars <-1
+
+#specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
+#specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
+#specieschar.hin2<-unique(specieschar.hin$species)
 
 
 #New model as of June 2016
@@ -101,47 +105,20 @@ names(fh.sim)
 # here's one iteration
 fh.sim$b[2000,]
 
-specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
-    rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
-specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
-specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(species)),]
+
+specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"], rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
+specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
+specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
 intid <- read.csv("input/raw_april.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
 intid.nodups <- intid.sm[!duplicated(intid.sm),]
-sync_int<-intid.nodups #synchrony change interactions
+#sync_int<-intid.nodups #synchrony change interactions
 
 
-summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
-summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
-
-
-## RESULTS !!	
-# For spp' phenological change
-it1000 <- matrix(0, ncol=3000, nrow=Nspp)
-for (i in 3000:6000){ # 3000 iterations?
-    summ_studyspp$model <- fh.sim$b[i,]
-    it1000[,(i-3000)] <- fh.sim$b[i,]
-}
-summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
-mean(summ_studyspp$stanfit)
-
-#computation of the standard error of the mean
-sem<-sd(summ_studyspp$stanfit)/sqrt(length(summ_studyspp$stanfit)); sem
-#95% confidence intervals of the mean
-c(mean(summ_studyspp$stanfit)-2*sem,mean(summ_studyspp$stanfit)+2*sem)
-
-#aquatic vs. terrestrial
-lol<-unique(specieschar.formodel[,c("studyid","species","terrestrial")])
-summ_studyspp<-merge(summ_studyspp, lol, by=c("studyid", "species"))
-data<-subset(summ_studyspp, terrestrial=="aquatic"); mean(data$stanfit); sd(data$stanfit)
-data<-subset(summ_studyspp, terrestrial=="terrestrial"); mean(data$stanfit); sd(data$stanfit)
-
-sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
-#95% confidence intervals of the mean
-c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
-
+summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "intid","species")); summ_studyspp<-unique(summ_studyspp)
+summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(intid)),]
 
 #For interactions AND synchrony change
 it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
