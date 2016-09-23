@@ -98,10 +98,10 @@ Neco <- length(unique(specieschar.hin4$terrestrial))
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
-## ADD ECOSYSTEM here
+## ADD ECOSYSTEM here, note model totally does not converge!
 # current error: Error : variable does not exist; processing stage=data initialization; variable name=p; base type=int
-# sync.model.eco <-stan("stanmodels/threelevelrandomslope_eco.stan", data=c("N","Nspp","y","species","year", "eco", "Neco"), iter=3000, chains=4)
-
+sync.model.eco <-stan("stanmodels/threelevelrandomslope_eco.stan", data=c("N","Nspp","y","species","year", "eco", "Neco"), iter=3000, chains=4)
+fh.sim.eco <- extract(sync.model.eco)
 
 #Match up interacting species and look at differences
 

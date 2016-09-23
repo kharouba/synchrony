@@ -8,14 +8,14 @@ data{
 	int<lower=0> N; 		//LEVEL 1: number of observations (total years of data across species)
 	int<lower=0> Nspp; 		//LEVEL 2: number of spcecies (i.e. grouping factor)
 	int<lower=0> Neco; 	//LEVEL 3: species is aquatic or terrestrial (i.e. grouping factor)
-	int<lower=0> p;	 //Number of fixed effect parameters + intercept
+	//int<lower=0> p;	 //Number of fixed effect parameters + intercept
 	
 //Group ids
 	int<lower=1> species[N];			//interaction identity
 	int<lower=1> eco[Nspp]; 	//vector of 0 or 1 for aquatic or terrestrial for each species
 	
-// predictors
-	real desMat[N,p]; //Design matrix
+	//predictors
+	vector[N] year; 	//year of data point
 
 // response
 	real y[N]; 		//mean synch change for each interaction; Continuous
@@ -71,7 +71,7 @@ transformed parameters{
 	
 	//Level 1, Individual mean
 	for (i in 1:N){
-		ypred[i]=beta_a_spp[species[i]]+beta_b_spp[species[i]]*desMat[i,p];
+		ypred[i]=beta_a_spp[species[i]]+beta_b_spp[species[i]]*year[i];
 	}
 }
 
