@@ -1,7 +1,6 @@
 #Aug 2016- Look at workflow from Lizzie- 2016Aug22_nullmodel.pdf
 ## Null model used for synchrony change
 
-
 #Step 1- create pre_climate change dataset
 #get interactions ready
 interact <- read.csv("input/raw_april.csv", header=TRUE)

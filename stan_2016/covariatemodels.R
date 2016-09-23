@@ -18,8 +18,9 @@ source("/users/kharouba/google drive/UBC/multiplot.R")
 
 ### need to match with the right intid!!!
 
-ndata<-melt(synch.model)
-names(ndata)[1]<-"id"; names(ndata)[2]<-"iteration"; names(ndata)[3]<-"sync.change"; ndata$intid<-rep(intid.nodups$intid, 3000) # 1,19,144,145 x3000
+ndata<-melt(synch.model[,2001:3000])
+names(ndata)[1]<-"id"; names(ndata)[2]<-"iteration"; names(ndata)[3]<-"sync.change"; 
+ndata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
 
 interact <- read.csv("input/raw_april.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
@@ -61,17 +62,19 @@ tog  <- tog[with(tog , order(intid, iteration)),]
 
 
 # Step 2- Load temp change data- from tempmodels_interactions.R
-temp.change <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE)
+mdata <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE)
 
-try<-as.data.frame(temp.change)
-try$is<-row.names(temp.change)
-goober<-melt(try, id="is")
+#try<-as.data.frame(temp.change)
+#try$is<-row.names(temp.change)
+#goober<-melt(try, id="is")
 
-mdata<-melt(temp.change[,2:1001])
-names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"temp.change"; mdata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
+#mdata<-melt(temp.change[,2:1001])
+names(mdata)[1]<-"id"; names(mdata)[3]<-"iteration"; names(mdata)[4]<-"temp.change";
+ #mdata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
+ mdata<- mdata[with(mdata, order(intid)),]
 
 # Step 3- Reduce synchrony interactions to only those with climate data
-all<-merge(mdata[,2:4], ndata[,2:4], by=c("intid","iteration"))
+all<-merge(mdata[,2:4], tog, by=c("intid"))
 all<- all[with(all , order(intid, iteration)),]
 
 # Model
