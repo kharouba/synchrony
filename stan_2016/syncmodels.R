@@ -189,8 +189,15 @@ sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
 tog<-rbind(sub, sub2)
 
 #KEY RESULT:
+#Direction and magnitude
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
 #computation of the standard error of the mean
+sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
+#95% confidence intervals of the mean
+c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
+
+#Magnitude only
+mean(abs(tog$meanchange), na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
 sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
 #95% confidence intervals of the mean
 c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
