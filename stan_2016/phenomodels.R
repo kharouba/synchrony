@@ -127,14 +127,20 @@ for (i in 3000:6000){ # 3000 iterations?
 summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
 mean(summ_studyspp$stanfit)
 
-it1000.out <- as.data.frame(it1000)
-it1000.out$studyid <- summ_studyspp$studyid
-it1000.out$species <- summ_studyspp$species
+it1K <- matrix(0, ncol=1000, nrow=Nspp)
+for (i in 3000:4000){ 
+    summ_studyspp$model <- fh.sim$b[i,]
+    it1K[,(i-3000)] <- fh.sim$b[i,]
+}
+
+it1K.out <- as.data.frame(it1K)
+it1K.out$studyid <- summ_studyspp$studyid
+it1K.out$species <- summ_studyspp$species
 
 library(reshape)
-it1000.out.long <- melt(it1000.out, id=c("studyid", "species"))
+it1K.out.long <- melt(it1K.out, id=c("studyid", "species"))
 
-write.csv(intid.wtempchange1K.long, "output/pheno.change.1K.csv")
+write.csv(it1K.out.long , "output/pheno.change.1K.csv")
 
 #computation of the standard error of the mean
 sem<-sd(summ_studyspp$stanfit)/sqrt(length(summ_studyspp$stanfit)); sem
