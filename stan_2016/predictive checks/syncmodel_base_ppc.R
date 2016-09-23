@@ -14,7 +14,7 @@ varfits<-rep(NA< length(uniquespp))
 intfits<-rep(NA< length(uniquespp))
 for(eachsp in 1:length(uniquespp)){
 	lmhere<-lm(abs(phenodiff_base)~yr1981, data=subset(sp2, intid==uniquespp[eachsp]))
-	slopefits[eachsp]<-coef(lmhere)[2]
+	slopefits[eachsp]<-abs(coef(lmhere)[2]) # take absolute value because we want to know how much relative timing has changed since year 1
 	varfits[eachsp]<-(summary(lmhere)$sigma)**2
 	intfits[eachsp]<-coef(lmhere)[1]
 }

@@ -6,8 +6,9 @@ comppool<-lm(phenovalue~year, data=rawlong.nodups)
 comppool.wtype<-lm(phenovalue~year*spp-1, data=rawlong.nodups)
 #nopool<-lm(phenovalue~year*species, data=rawlong.nodups)
 # No pooling:
-rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
+#rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
 uniquespp<-unique(rawlong.tot$species)
+#uniquespp<-unique(rawlong.tot$newid)
 slopefits<-rep(NA< length(uniquespp))
 varfits<-rep(NA< length(uniquespp))
 intfits<-rep(NA< length(uniquespp))

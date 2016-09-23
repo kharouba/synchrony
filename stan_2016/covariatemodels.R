@@ -61,9 +61,14 @@ tog  <- tog[with(tog , order(intid, iteration)),]
 
 
 # Step 2- Load temp change data- from tempmodels_interactions.R
+temp.change <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE)
 
-mdata<-melt(temp.change)
-names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"temp.change"; mdata$intid<-rep(intid.nodups$intid, 3000) # 1,19,144,145 x3000
+try<-as.data.frame(temp.change)
+try$is<-row.names(temp.change)
+goober<-melt(try, id="is")
+
+mdata<-melt(temp.change[,2:1001])
+names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"temp.change"; mdata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
 
 # Step 3- Reduce synchrony interactions to only those with climate data
 all<-merge(mdata[,2:4], ndata[,2:4], by=c("intid","iteration"))

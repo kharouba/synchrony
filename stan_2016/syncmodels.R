@@ -77,13 +77,13 @@ rawlong.tot<-rbind(hinge_non, hinges)
 # Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
-rawlong.tot <- rawlong.tot[with(rawlong.tot, order(intid)),]
-rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
-rawlong.tot <- rawlong.tot[with(rawlong.tot, order(intid, species)),]
+rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
+#rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
+#rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
 N <- nrow(rawlong.tot)
 y <- rawlong.tot$phenovalue
-Nspp <- length(unique(rawlong.tot$newid)) #newid is character !
-species <- as.numeric(as.factor(rawlong.tot$newid))
+Nspp <- length(unique(rawlong.tot$species)) #newid is character !
+species <- as.numeric(as.factor(rawlong.tot$species))
 year <- rawlong.tot$yr1981
 
 #specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
@@ -105,7 +105,6 @@ names(fh.sim)
 # here's one iteration
 fh.sim$b[2000,]
 
-
 specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"], rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
 specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
@@ -117,8 +116,8 @@ intid.nodups <- intid.sm[!duplicated(intid.sm),]
 #sync_int<-intid.nodups #synchrony change interactions
 
 
-summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "intid","species")); summ_studyspp<-unique(summ_studyspp)
-summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(intid)),]
+summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
+summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 
 #For interactions AND synchrony change
 it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
@@ -131,6 +130,15 @@ for (i in 3000:6000){ # 2000 iterations?
     it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer$model.y #model.x=spp1
 }
 synch.model<-it1000
+
+#it1000 <- matrix(0, ncol=3000, nrow=Nspp) #2000 iterations for 53 interactions;
+#for (i in 3000:6000){ # 2000 iterations?
+ #   summ_studyspp$model <- fh.sim$b[i,]
+  #  it1000[,(i-3000)] <- summ_studyspp$model
+#}
+#synch.model<-it1000
+#dr$stan<-rowMeans(it1000, na.rm=TRUE)
+
 
 
 # FOR INTERPRETATION
@@ -242,9 +250,9 @@ sp <- sp[with(sp, order(intid, species)),]
 sp2<-unique(sp[,c("studyid","intid","yr1981","phenodiff_base")])
 N <- nrow(sp2)
 y <- abs(sp2$phenodiff_base)
-specieschar.hin<- aggregate(sp2["phenodiff_base"], sp2[c("studyid", "intid")], FUN=length) #number of years per species
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
-Nspp <- nrow(specieschar.hin)
+#specieschar.hin<- aggregate(sp2["phenodiff_base"], sp2[c("studyid", "intid")], FUN=length) #number of years per species
+#specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
+Nspp <- length(unique(sp2$intid))
 species <- as.numeric(as.factor(sp2$intid))
 year <- sp2$yr1981
 
@@ -277,11 +285,22 @@ for (i in 3000:6000){ # 2000 iterations?
 synch.model<-it1000
 summ_studyspp$meanslope<-abs(rowMeans(synch.model)) # take absolute value because we want to know how much relative timing has changed since year 1
 
+*** to compare stan fits to linear fits : scatterplot with 1:1 line (abline(0,1))
+
 #Results
 median(summ_studyspp$meanslope)
 sem<-sd(summ_studyspp$meanslope)/sqrt(length(summ_studyspp$meanslope)); sem
+
+because hist is non-normal use: Bootstrap CI calculations
+boot.ci(boot(summ_studyspp$meanslope,function(x,i) median(x[i]), R=1000))
+OR quantiles of binomial distribution:
+sort(summ_studyspp$meanslope)[qbinom(c(.025,.975), length(summ_studyspp$meanslope), 0.5)]
+
 #95% confidence intervals of the mean
 c(mean(summ_studyspp$meanslope)-2*sem,mean(summ_studyspp$meanslope)+2*sem)
+
+
+print(baseline.model,"b",probs=c(.025,.975))
 
 ##### FIGURES #####
 #plot all species

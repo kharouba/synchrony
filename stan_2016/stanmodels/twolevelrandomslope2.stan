@@ -42,5 +42,3 @@ model{
 	
 	y~normal(ypred, sigma_y);
 }	
-
-	
