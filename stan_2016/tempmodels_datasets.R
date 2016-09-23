@@ -1,4 +1,9 @@
 ### to get absolute value of temperature change (i.e. based on unique datasets) ###
+### Note that as of 23 Sep 2016 this file is super similar to tempmodels_interactions.R ###
+### Uniquely, however, this file looks at the model output a little to make sure  #
+## ...that the models appear to be working. ###
+### But the order that the data go into the models in each file is different... ###
+### In tempmodels_interactions.R I check that we're getting similar answers between the two code files though ###
 
 rm(list=ls())
 options(stringsAsFactors=FALSE)
@@ -14,7 +19,7 @@ library(nlme)
 library(gridExtra)
 library(plyr)
 library(dplyr)
-set_cppo("fast") 
+# set_cppo("fast") 
 
 ## source the temp dataset cleaning code
 
@@ -75,6 +80,8 @@ plot(lmfit~data$stanfit, data=compare.models)
 abline(0,1)
 abline(lm(lmfit~data$stanfit, data=compare.models))
 
+write.csv(compare.models, "output/compare.tempmodels.csv", row.names=FALSE)
+
 # looking at few datasets
 
 # start with one long-term one
@@ -100,6 +107,8 @@ abline(lm(envvalue~yr1981, data=subby))
 subby <- subset(dataset, datasetid=="HMK052 _ 16")
 plot(envvalue~yr1981, data=subby)
 abline(lm(envvalue~yr1981, data=subby))
+
+## OLDER code below, Lizzie did not work on or check this ... 
 
 
 #by group

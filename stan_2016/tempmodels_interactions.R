@@ -1,4 +1,6 @@
 ##### TO GET TEMP CHANGE PER INTERACTION ######
+### note that as of 23 Sep 2016 this file uses the same models and data as tempmodels_daasets.R ###
+### But the order that the data go into the models in each file is different... ###
 
 rm(list=ls())
 options(stringsAsFactors=FALSE)
@@ -16,7 +18,7 @@ library(gridExtra)
 library(reshape)
 library(plyr)
 library(dplyr)
-set_cppo("fast") 
+# set_cppo("fast") 
 
 ## HAS TEMP CHANGED?
 ## source the temp dataset cleaning code
@@ -73,8 +75,16 @@ unique(temp_int[,c("datasetid")])
 # Get means for all interactions, including ...
 # Those interactions where each species had a slightly different climate dataset
 
+# Compare this model to the one (that should be the same!) in tempmodels_datasets
+summ_studyspp$model.mean <- colMeans(goo$b)
+othermodel <- read.csv("output/compare.tempmodels.csv", header=TRUE)
+compare.samemodel <- merge(summ_studyspp, othermodel, by="datasetid")
+plot(data.stanfit~model.mean, data=compare.samemodel)
+abline(0,1)
+
 # Now we need to get the averages since some species 
 temp.change <- matrix(0, ncol=1000, nrow=22) # 1000 iterations for 22 interactions;
+allspecieswcoef <- matrix(0, ncol=1000, nrow=22)
 for (i in 2000:3000){ # 2000 iterations?
     summ_studyspp$model.est <- goo$b[i,]
     # step 1: Get back the missing species
@@ -102,5 +112,7 @@ temp.change$intid <- modelmeanz$intid
 
 intid.wtempchange <- data.frame(intid=modelmeanz$intid, stanfit=rowMeans(temp.change, na.rm=TRUE)) # mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
 
-write.csv(temp.change, "output/temp.change.1K.csv")
+intid.wtempchange1K.long <- melt(temp.change, id="intid")
+
+write.csv(intid.wtempchange1K.long, "output/temp.change.1K.csv")
 write.csv(intid.wtempchange, "output/temp.change.meanover1K.csv", row.names=FALSE)
