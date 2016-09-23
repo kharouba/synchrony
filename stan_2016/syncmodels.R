@@ -215,13 +215,22 @@ text_low <- textGrob("Larger interval", gp=gpar(fontsize=13, fontface="bold"))
 ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=2, xmax=2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-2, xmax=-2, ymin=-0.5, ymax=-0.5)
 
 #Link to individual species
+it1000 <- matrix(0, ncol=3000, nrow=Nspp)
+for (i in 3000:6000){ # 3000 iterations?
+    summ_studyspp$model <- fh.sim$b[i,]
+    it1000[,(i-3000)] <- summ_studyspp$model
+}
+summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+#mean(summ_studyspp$stanfit)
+
+
 indiv_intxn <- merge(tog, summ_studyspp[,c("studyid","species","stanfit")], by.x=c("studyid", "spp1"), by.y=c("studyid", "species"), all.x=TRUE)
 indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit")], by.x=c("studyid", "spp2"), by.y=c("studyid", "species"), all.x=TRUE)
-indiv_intxn$direction<-ifelse(indiv_intxn$meanchange>0, 1, 0)
-with(indiv_intxn, cor(stanfit.x, stanfit.y))
+#indiv_intxn$direction<-ifelse(indiv_intxn$meanchange>0, 1, 0)
+#with(indiv_intxn, cor(stanfit.x, stanfit.y))
 
 
-ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y))+geom_point(aes(colour=factor(direction), size=2))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme(legend.position="false")+xlab("resource")+ylab("consumer")
+ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y))+geom_point(aes(size=2))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme(legend.position="false")+xlab("resource")+ylab("consumer")
 
 #annotate(geom="text", x=2, y=-1, label="smaller interval", colour="black")
 #theme(plot.margin = unit(c(1,1,2,1), "lines"))
