@@ -8,6 +8,7 @@ library(shinyStan)
 library(grid)
 library(nlme)
 library(reshape)
+library(dplyr)
 set_cppo("fast")  # for best running speed
 source("/users/kharouba/google drive/UBC/multiplot.R")
 #library(reshape)
@@ -60,6 +61,10 @@ tog<-rbind(sub, sub2)
 
 tog  <- tog[with(tog , order(intid, iteration)),]
 
+write.csv(tog, "/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/sync.change.1K.csv")
+
+tog <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/sync.change.1K.csv", header=TRUE)
+
 
 # Step 2- Load temp change data- from tempmodels_interactions.R
 mdata <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE)
@@ -76,6 +81,8 @@ names(mdata)[1]<-"id"; names(mdata)[3]<-"iteration"; names(mdata)[4]<-"temp.chan
 # Step 3- Reduce synchrony interactions to only those with climate data
 all<-merge(mdata[,2:4], tog, by=c("intid"))
 all<- all[with(all , order(intid, iteration)),]
+
+new<-inner_join(mdata, tog, by = "intid")
 
 # Model
 N <- nrow(all)
