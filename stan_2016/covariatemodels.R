@@ -65,31 +65,40 @@ write.csv(tog, "/users/kharouba/google drive/UBC/synchrony project/analysis/stan
 
 tog <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/sync.change.1K.csv", header=TRUE)
 
+syncdat.full <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/sync.change.1K.csv", header=TRUE)
 
 # Step 2- Load temp change data- from tempmodels_interactions.R
-mdata <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE)
 
-#try<-as.data.frame(temp.change)
-#try$is<-row.names(temp.change)
-#goober<-melt(try, id="is")
+tempdat.full <- read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/output/temp.change.1K.csv", header=TRUE, col.names=c("rowhere","intid", "iteration", "temp.change"))
 
-#mdata<-melt(temp.change[,2:1001])
-names(mdata)[1]<-"id"; names(mdata)[3]<-"iteration"; names(mdata)[4]<-"temp.change";
- #mdata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
- mdata<- mdata[with(mdata, order(intid)),]
+syncdat <- subset(syncdat.full, select=c("intid", "sync.change", "iteration"))
+tempdat <- subset(tempdat.full, select=c("intid", "temp.change", "iteration"))
+
+tempdat$iteration <- as.numeric(as.factor(tempdat$iteration))
+mode(syncdat$iteration)
+
 
 # Step 3- Reduce synchrony interactions to only those with climate data
-all<-merge(mdata[,2:4], tog, by=c("intid"))
-all<- all[with(all , order(intid, iteration)),]
+tryme <- inner_join(syncdat, tempdat, by=c("intid", "iteration"))
 
-new<-inner_join(mdata, tog, by = "intid")
 
 # Model
-N <- nrow(all)
-y <- all$sync.change
-year<-all$temp.change
-Nspp <- length(unique(all$intid))
-species <- as.numeric(as.factor(all$intid))
+N <- nrow(tryme)
+y <- tryme$sync.change
+year<-tryme$temp.change
+Nspp <- length(unique(tryme$intid))
+species <- as.numeric(as.factor(tryme$intid))
 
-cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomeffects.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+launch_shinystan(cov.model)
+
+goo <- extract(cov.model)# dim(fh.sim$b) # number of iterations*number of species 
+
+data<-unique(tryme[,c("intid")]); data<-as.data.frame(data)
+data$stan<-colMeans(goo$b)
+
+print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
+
+
 
