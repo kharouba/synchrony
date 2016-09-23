@@ -5,10 +5,10 @@
 ## Let's go! ##
 
 options(stringsAsFactors=FALSE)
-setwd("/users/kharouba/google drive/UBC/synchrony project/analysis")
+# setwd("/users/kharouba/google drive/UBC/synchrony project/analysis")
 
 # get data
-taxer <- read.csv("taxa.csv", header=TRUE)
+taxer <- read.csv("2013_2015/input/taxa.csv", header=TRUE)
 #obsraw <- read.csv("obs.csv", header=TRUE)
 
 # data clean up (more needed here!)

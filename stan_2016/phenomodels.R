@@ -3,7 +3,8 @@
 rm(list=ls()) 
 options(stringsAsFactors = FALSE)
 
-setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+setwd("/users/kharouba/google drive/UBC/synchrony project/analysis")
+# setwd("~/Documents/git/projects/trophsynch/synchrony")
 library(ggplot2)
 library(rstan)
 library(shinyStan)
@@ -17,7 +18,10 @@ source("/users/kharouba/google drive/UBC/multiplot.R")
 
 #get data
 source("datacleaning.R")
-# in the data file: spp1 = neg= negative species e.g. resource 
+# in the data file: spp1 = neg= negative species e.g. resource
+
+setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
 
 rawlong <- read.csv("rawlong.csv", header=TRUE)
 ##
@@ -87,7 +91,7 @@ year <- rawlong.tot$yr1981
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
-sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 #Match up interacting species and look at differences
 
@@ -122,6 +126,15 @@ for (i in 3000:6000){ # 3000 iterations?
 }
 summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
 mean(summ_studyspp$stanfit)
+
+it1000.out <- as.data.frame(it1000)
+it1000.out$studyid <- summ_studyspp$studyid
+it1000.out$species <- summ_studyspp$species
+
+library(reshape)
+it1000.out.long <- melt(it1000.out, id=c("studyid", "species"))
+
+write.csv(intid.wtempchange1K.long, "output/pheno.change.1K.csv")
 
 #computation of the standard error of the mean
 sem<-sd(summ_studyspp$stanfit)/sqrt(length(summ_studyspp$stanfit)); sem

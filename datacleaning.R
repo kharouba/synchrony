@@ -1,12 +1,14 @@
 library(ggplot2)
 library(lattice)
- #run lizzie's code: synchbuildintxn_hk:
+ #run lizzie's code: synchbuildintxn_hk
 
-rm(list=ls())
+## Lizzie made some updates to this code so it will run on the new file structure ##
+## I updated it so it can files and had it now write to a new output folder ##
+## but it still stalls out on all the figures and such so it really needs to be cleaned up ##
 
-setwd("/users/kharouba/google drive/UBC/synchrony project/analysis")
-source("/users/kharouba/google drive/UBC/synchrony project/analysis/synchbuildintxn_hk.R")
+# rm(list=ls())
 
+source("synchbuildintxn_hk.R")
 
 row.names=FALSE
 
@@ -14,7 +16,7 @@ row.names=FALSE
 #stud<-read.csv("studies.csv", header=TRUE, na.strings="NA", as.is=TRUE)
 
 #OBSERVATIONAL
-obs<-read.csv("obs_start.csv", header=TRUE, na.strings="NA", as.is=TRUE)
+obs<-read.csv("2013_2015/input/obs_start.csv", header=TRUE, na.strings="NA", as.is=TRUE)
 #species across multiple studies- solution-add unique id
 obs$spp<-with(obs, paste(genus, species, sep=" "))
 obs$spp2<-with(obs, paste(genus_2nd, spp_2nd, sep=" "))
@@ -45,7 +47,7 @@ some$intid<-with(some, intid+1)
 some2<-subset(int, intid<154)
 int<-rbind(some2, some)
 
-write.csv(int, "intxn.csv")
+write.csv(int, "output/intxn.csv")
 
 
 
@@ -207,7 +209,7 @@ total2$phenodiff<-with(total2, neg_phenovalue-pos_phenovalue)
 blerk<-unique(obs[,c("studyid","phenofreq")])
 total3<-merge(total2, blerk, by="studyid")
 
-write.csv(total3, "int_phenodata.csv")
+write.csv(total3, "output/int_phenodata.csv")
 
 neg$spp<-"spp1"
 pos$spp<-"spp2"
@@ -221,7 +223,7 @@ names(pos)[names(pos)=="pos_slope"]<-"slope"
 
 all<-rbind(neg,pos)
 all<-subset(all, studyid!="0")
-write.csv(all, "spp_phenodata2.csv")
+write.csv(all, "output/spp_phenodata2.csv")
 
 ##Figure 1- raw data doy~year
 ggplot(all, aes(x=year, y=phenovalue)) + 
@@ -238,19 +240,19 @@ geom_point(aes(color=studyid, size=1))+
 geom_hline(yintercept=0, linetype="dashed")+
 #geom_smooth(method="lm", size=1, colour="black", se=FALSE)+
 theme_bw()+xlab("Year") + ylab("Difference in doy")+
-opts(axis.title.x = theme_text(size=15), axis.text.x=theme_text(size=15), axis.text.y=theme_text(size=15), axis.title.y=theme_text(size=15, angle=90))
+# opts(axis.title.x = theme_text(size=15), axis.text.x=theme_text(size=15), axis.text.y=theme_text(size=15), axis.title.y=theme_text(size=15, angle=90))
 #by study
 ggplot(mat, aes(x=year, y=phenodiff)) + 
 geom_point(aes(color=studyid, size=1))+facet_grid(~studyid)+
 geom_hline(yintercept=0, linetype="dashed")+
 #geom_smooth(method="lm", size=1, colour="black", se=FALSE)+
 theme_bw()+xlab("Year") + ylab("Difference in doy")+
-opts(axis.title.x = theme_text(size=15), axis.text.x=theme_text(size=15), axis.text.y=theme_text(size=15), axis.title.y=theme_text(size=15, angle=90))
+# opts(axis.title.x = theme_text(size=15), axis.text.x=theme_text(size=15), axis.text.y=theme_text(size=15), axis.title.y=theme_text(size=15, angle=90))
 
 xyplot(abs(phenodiff)~year|studyid, groups=intid, data=mat)
 
 #long
-mat2
+# mat2
 
 
 ######
@@ -286,7 +288,7 @@ new$slopediff<-with(new, spp1_slope-spp2_slope)
 new$endstart<-with(new, end_phenodiff-start_phenodiff)
 new<-new[order(new$start_phenodiff, new$end_phenodiff),]
 new<-subset(new, studyid!="0")
-write.csv(new, "endstart.csv")
+write.csv(new, "output/endstart.csv")
 
 plot(slopediff~endstart, ylim=c(-5,5), data=subset(new, studyid!="HMK006"))
 xyplot(slopediff~endstart|studyid, groups=intid, data=subset(new, studyid!="HMK006"))
@@ -308,7 +310,8 @@ int<-intxn
 int<-int[order(int$studyid),]
 int$intid<-1:nrow(int)
 
-take mean per shrub type - HMK 003- use spp_repl
+# take mean per shrub type - HMK 003- use spp_repl
+stop(print('stopping code here, rest of code looks to be plotting ...'))
 
 ##### extra
 #just slopes
