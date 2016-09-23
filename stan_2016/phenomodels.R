@@ -81,17 +81,27 @@ N <- nrow(rawlong.tot)
 y <- rawlong.tot$phenovalue
 specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
 specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-specieschar.hin2<-unique(specieschar.hin$species)
+specieschar.hin2 <- unique(specieschar.hin$species)
 Nspp <- length(specieschar.hin2)
 species <- as.numeric(as.factor(rawlong.tot$species))
 year <- rawlong.tot$yr1981
 #nVars <-1
+# get ecosystem for each species
+specieschar.hin3 <- subset(specieschar.hin, select=c("species", "terrestrial"))
+specieschar.hin4 <- specieschar.hin3[!duplicated(specieschar.hin3),]
+eco <- as.numeric(as.factor(specieschar.hin4$terrestrial))
+Neco <- length(unique(specieschar.hin4$terrestrial))
 
 
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+## ADD ECOSYSTEM here
+# current error: Error : variable does not exist; processing stage=data initialization; variable name=p; base type=int
+# sync.model.eco <-stan("stanmodels/threelevelrandomslope_eco.stan", data=c("N","Nspp","y","species","year", "eco", "Neco"), iter=3000, chains=4)
+
 
 #Match up interacting species and look at differences
 
