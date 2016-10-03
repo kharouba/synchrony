@@ -1,7 +1,7 @@
 ### Started 1 April 2015 ###
 ### April Fool's Day! ###
 
-## Run STAN with synchrony data ##
+## Trying to run STAN with synchrony data ##
 
 rm(list=ls()) 
 options(stringsAsFactors = FALSE)
@@ -40,11 +40,9 @@ specieschar <- aggregate(specieschar.wdups["phenovalue"],
 # and order it!
 rawlong.nodups<-rawlong
 rawlong.nodups <- rawlong.nodups[with(rawlong.nodups, order(species, year)),]
-#rawlong.nodups$newid<-with(rawlong.nodups, paste(intid,"_",species))
-#rawlong.nodups <- rawlong.tot[with(rawlong.nodups, order(newid)),]
-#specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
-  #  rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
- #specieschar.formodel <- specieschar.formodel[with(specieschar.formodel, order(species)),]   
+specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
+    rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
+ specieschar.formodel <- specieschar.formodel[with(specieschar.formodel, order(species)),]   
 
 #number of years per species
     
@@ -74,27 +72,51 @@ rawlong.tot<-rbind(hinge_non, hinges)
 # prep the data to fit the model including:
 # aggregate to get species level characteristics
 # subset down to the phenovalues
-# Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
+
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
 rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
-#rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
-#rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
 N <- nrow(rawlong.tot)
 y <- rawlong.tot$phenovalue
-Nspp <- length(unique(rawlong.tot$species)) #newid is character !
+specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid", "species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
+specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
+Nspp <- nrow(specieschar.hin)
 species <- as.numeric(as.factor(rawlong.tot$species))
 year <- rawlong.tot$yr1981
-
-#specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
-#specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
-#specieschar.hin2<-unique(specieschar.hin$species)
+#nVars <-1
 
 
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+#plot all species
+asdf<-summary(sync.model, pars="b")
+#to get median coefficients from SUMMARY
+median<-asdf[[1]][1:91]; new<-as.data.frame(y); #number of species =91
+d<-data.frame(y=unlist(median), grp=1:length(median)) #-0.715645239
+min<-asdf[[1]][274:364]; e<-data.frame(min=unlist(min)) #-1.1222299
+max<-asdf[[1]][638:728]; f<-data.frame(max=unlist(max)) #-0.316333047
+d$min<-e$min; d$max<-f$max;
+details<-unique(specieschar.formodel[,c("studyid","species","terrestrial")])
+details <- details[with(details, order(species)),]
+d$terrestrial<-details$terrestrial; d$species<-details$species
+
+#asdf[[1]][182:273] #to get sd
+#min<-asdf[[1]][274:364]; min<-as.data.frame(min) #to get 2.5%
+#asdf[[1]][365:455] #to get 25 (-0.658)
+#asdf[[1]][456:546] # to get 50
+#asdf[[1]][547:637] # to get 75
+#max<-asdf[[1]][638:728]; max<-as.data.frame(max) # to get 97.5
+
+d$group <- factor(d$terrestrial, levels = d$terrestrial[order(d$terrestrial)])
+
+ggplot(d, aes(x=factor(species), y=y, ymin=min, ymax=max, colour=terrestrial))+geom_pointrange(aes(width=.05, colour=factor(terrestrial)))+theme_bw()+geom_point(size=3, aes(colour=factor(terrestrial)))+xlab("species")+ylab("Phenological change (doy/year)")+geom_hline(xintercept=0, linetype="longdash", colour="grey")+theme(legend.position="false")+coord_flip()
+
+OR
+ggplot(d, aes(x=factor(species), y=y, ymin=min, ymax=max, colour=terrestrial))+geom_pointrange(aes(width=.05, colour=factor(terrestrial)))+theme_bw()+geom_point(size=3, aes(colour=factor(terrestrial)))+xlab("species")+ylab("Phenological change (doy/year)")+geom_hline(xintercept=0, linetype="longdash", colour="grey")+theme(legend.position="false")+facet_wrap(~terrestrial, scale="free")+theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 #Match up interacting species and look at differences
 
@@ -105,19 +127,49 @@ names(fh.sim)
 # here's one iteration
 fh.sim$b[2000,]
 
-specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"], rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
-specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
-specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
+specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
+    rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
+specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
+specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(species)),]
 intid <- read.csv("input/raw_april.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
 intid.nodups <- intid.sm[!duplicated(intid.sm),]
-#sync_int<-intid.nodups #synchrony change interactions
+sync_int<-intid.nodups #synchrony change interactions
 
 
 summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
+
+
+## RESULTS !!	
+# For spp' phenological change
+it1000 <- matrix(0, ncol=3000, nrow=Nspp)
+for (i in 3000:6000){ # 3000 iterations?
+    summ_studyspp$model <- fh.sim$b[i,]
+    it1000[,(i-3000)] <- fh.sim$b[i,]
+}
+summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+mean(summ_studyspp$stanfit)
+
+#computation of the standard error of the mean
+sem<-sd(summ_studyspp$stanfit)/sqrt(length(summ_studyspp$stanfit)); sem
+#95% confidence intervals of the mean
+c(mean(summ_studyspp$stanfit)-2*sem,mean(summ_studyspp$stanfit)+2*sem)
+
+#aquatic vs. terrestrial
+lol<-unique(specieschar.formodel[,c("studyid","species","terrestrial")])
+summ_studyspp<-merge(summ_studyspp, lol, by=c("studyid", "species"))
+data<-subset(summ_studyspp, terrestrial=="aquatic"); mean(data$stanfit); sd(data$stanfit)
+data<-subset(summ_studyspp, terrestrial=="terrestrial"); mean(data$stanfit); sd(data$stanfit)
+
+sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
+#95% confidence intervals of the mean
+c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
+
+
+
 
 #For interactions AND synchrony change
 it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
@@ -131,16 +183,42 @@ for (i in 3000:6000){ # 2000 iterations?
 }
 synch.model<-it1000
 
-#it1000 <- matrix(0, ncol=3000, nrow=Nspp) #2000 iterations for 53 interactions;
-#for (i in 3000:6000){ # 2000 iterations?
- #   summ_studyspp$model <- fh.sim$b[i,]
-  #  it1000[,(i-3000)] <- summ_studyspp$model
-#}
-#synch.model<-it1000
-#dr$stan<-rowMeans(it1000, na.rm=TRUE)
 
+# For covariate model
+#Negative difference= decreasing synchrony ()
+#Positive difference= increasing synchrony ()
+pubs<-t(synch.model)
+ndata <- melt(pubs)
+names(ndata)[1]<-"iteration"; names(ndata)[2]<-"intid"; names(ndata)[3]<-"sync.change"
 
+interact <- read.csv("input/raw_april.csv", header=TRUE)
+interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
+#positive phenodiff= consumer emerges BEFORE resource
+#negative phenodiff= resource emerges BEFORE consumer
+season <- aggregate(interact["newphenodiff"], interact[c("studyid", "intid")], FUN=mean)
 
+pubs2<-merge(ndata, season, by=c("intid"))
+
+#increasing synchrony (i.e. species are getting closer together)
+inc1<-subset(pubs2, newphenodiff>0 & sync.change<0)
+inc2<-subset(pubs2, newphenodiff<0 & sync.change>0)
+inc<-rbind(inc1, inc2)
+inc$sync.change<-abs(inc$sync.change)
+# decreasing synchrony (i.e. speceis are getting farther apart)
+dec1<-subset(pubs2, newphenodiff>0 & sync.change>0)
+dec2<-subset(pubs2, newphenodiff<0 & sync.change<0)
+dec<-rbind(dec1, dec2)
+dec$sync.change<-abs(dec$sync.change)
+dec$sync.change<--dec$sync.change
+tog<-rbind(dec, inc)
+
+#fix mismatchs
+sub<-subset(tog, intid=="1" | intid=="175" | intid=="235")
+sub$sync.change<--sub$sync.change
+sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
+tog<-rbind(sub, sub2)
+
+#KEY RESULT:
 # FOR INTERPRETATION
 #Negative difference= decreasing synchrony ()
 #Positive difference= increasing synchrony ()
@@ -188,19 +266,12 @@ sub$meanchange<--sub$meanchange
 sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
 tog<-rbind(sub, sub2)
 
-#KEY RESULT:
-#Direction and magnitude
+# RESULTS #
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
 #computation of the standard error of the mean
 sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
 #95% confidence intervals of the mean
 c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
-
-#Magnitude only
-mean(abs(tog$meanchange), na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
-sem<-sd(abs(tog$meanchange)/sqrt(length(abs(tog$meanchange))); sem
-#95% confidence intervals of the mean
-c(mean(abs(tog$meanchange))-2*sem,mean(abs(tog$meanchange))+2*sem)
 
 #by group
 sub<-subset(tog, terrestrial=="terrestrial"); mean(sub$meanchange); sd(sub$meanchange)
@@ -215,72 +286,19 @@ text_low <- textGrob("Larger interval", gp=gpar(fontsize=13, fontface="bold"))
 ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=2, xmax=2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-2, xmax=-2, ymin=-0.5, ymax=-0.5)
 
 #Link to individual species
-tog<-tog[,c(1:6,9:10)]
-it1000 <- matrix(0, ncol=3000, nrow=Nspp)
-for (i in 3000:6000){ # 3000 iterations?
-    summ_studyspp$model <- fh.sim$b[i,]
-    it1000[,(i-3000)] <- summ_studyspp$model
-}
-summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
-#mean(summ_studyspp$stanfit)
-
-asdf<-summary(sync.model, pars="b")
-#to get median coefficients from SUMMARY
-median<-asdf[[1]][1:91]; new<-as.data.frame(y); #number of species =91
-d<-data.frame(y=unlist(median), grp=1:length(median)) 
-min<-asdf[[1]][274:364]; e<-data.frame(min=unlist(min)) 
-max<-asdf[[1]][638:728]; f<-data.frame(max=unlist(max)) 
-d$min<-e$min; d$max<-f$max;
-
-summ_studyspp$min<-d$min; summ_studyspp$max<-d$max; summ_studyspp$median<-d$y
+indiv_intxn <- merge(tog, summ_studyspp[,c("studyid","species","stanfit")], by.x=c("studyid", "spp1"), by.y=c("studyid", "species"), all.x=TRUE)
+indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit")], by.x=c("studyid", "spp2"), by.y=c("studyid", "species"), all.x=TRUE)
+indiv_intxn$direction<-ifelse(indiv_intxn$meanchange>0, 1, 0)
+with(indiv_intxn, cor(stanfit.x, stanfit.y))
 
 
+ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y))+geom_point(aes(colour=factor(direction), size=2))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme(legend.position="false")+xlab("resource")+ylab("consumer")
 
-indiv_intxn <- merge(tog, summ_studyspp[,c("studyid","species","stanfit","min","max")], by.x=c("studyid", "spp1"), by.y=c("studyid", "species"), all.x=TRUE)
-indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit","min","max")], by.x=c("studyid", "spp2"), by.y=c("studyid", "species"), all.x=TRUE)
-#indiv_intxn$direction<-ifelse(indiv_intxn$meanchange>0, 1, 0)
-#with(indiv_intxn, cor(stanfit.x, stanfit.y))
-
-
-ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y))+geom_point(aes(size=2))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme(legend.position="false")+xlab("resource")+ylab("consumer")
-
-#with labels:
-indiv_intxn$pattern<-with(indiv_intxn, ifelse(meanchange<=0, "decreasing", "increasing"))
-#indiv_intxn$pattern<-with(indiv_intxn, recode(meanchange,"<0='decreasing';>=0='increasing'"))
-
-indiv_intxn$seasonal_order<-with(indiv_intxn, ifelse(newphenodiff<0, "consumer_first", "resource_first"))
-#positive phenodiff= consumer emerges BEFORE resource
-#negative phenodiff= resource emerges BEFORE consumer
-
-ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y, label = intid))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme()+xlab("resource")+ylab("consumer")+geom_text(aes(colour=factor(pattern)), check_overlap=TRUE)+geom_abline(intercept=0, slope=1)
-
-ggplot(subset(indiv_intxn, seasonal_order=="consumer_first"), aes(x=stanfit.x, y=stanfit.y, label = intid))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme()+xlab("resource")+ylab("consumer")+geom_text(aes(colour=factor(pattern)), check_overlap=TRUE)+geom_abline(intercept=0, slope=1)
-
-
-#with error bars
-tryagain<-merge(summ_studyspp, unique(rawlong.tot[,c("intid","species")]), by="species")
-#tryagain$intid<-as.factor(tryagain$intid)
-#tryagain$stanfit<-transform(tryagain$stanfit, variable=reorder(intid, value))
-#tryagain$spp2 <-factor(tryagain$species, levels=tryagain[order(tryagain$intid)])
-tryagain<-merge(tryagain, tog[,c("studyid","intid","meanchange")], by=c("studyid","intid"))
-tryagain$intid<-factor(tryagain$intid, levels=tryagain[order(tryagain$meanchange),"intid"])
-tryagain<-tryagain[order(tryagain$meanchange),];
-tryagain$intid <- transform(tryagain$intid, variable=reorder(tryagain$intid, -meanchange) ) 
-
-ggplot(tryagain, aes(x=intid, y=stanfit, label = intid))+geom_point(size=4, aes(colour=abs(meanchange)))+geom_errorbar(aes(ymin=min, ymax=max), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme()+ggtitle("Stan slope estimates with 95% credible intervals")+xlab("interactions")+ylab("phenological change")+coord_flip()
-#b<-ggplot(tryagain, aes(x=intid, y=abs(meanchange)))+geom_point()+coord_flip()
-#multiplot(a, b, cols=2)
-
-ggplot(indiv_intxn, aes(x=stanfit.x, y=stanfit.y, label = intid))+geom_point(size=2)+geom_errorbar(aes(ymin=min.y, ymax=max.y), width=.0025, colour="black") +geom_errorbarh(aes(xmin=min.x, xmax=max.x))+geom_vline(xintercept=0, linetype="dashed")+geom_hline(yintercept=0, linetype="dashed")+theme_bw()+theme()+xlab("resource")+ylab("consumer")+geom_abline(intercept=0, slope=1)
-
-+ylim(min(stanfit.y), max(stanfit.y))
-
-+geom_text(aes(colour=factor(pattern)), check_overlap=TRUE)
 #annotate(geom="text", x=2, y=-1, label="smaller interval", colour="black")
 #theme(plot.margin = unit(c(1,1,2,1), "lines"))
 
 
-#######   Magnitude of change: Phenodiff- year 1 difference ########
+#Magnitude of change: Phenodiff- year 1 difference
 interact <- read.csv("input/raw_april.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp
 sp<-merge(rawlong.tot, interact[,c("studyid","intid","year","newphenodiff")], by=c("studyid","intid","year"))
@@ -306,90 +324,18 @@ sp2<-merge(sp, best2, by=c("intid","year"))
 sp<-sp2
 
 
-sp <- sp[with(sp, order(intid, species)),]
-sp2<-unique(sp[,c("studyid","intid","yr1981","phenodiff_base")])
-N <- nrow(sp2)
-y <- abs(sp2$phenodiff_base)
-#specieschar.hin<- aggregate(sp2["phenodiff_base"], sp2[c("studyid", "intid")], FUN=length) #number of years per species
-#specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
-Nspp <- length(unique(sp2$intid))
-species <- as.numeric(as.factor(sp2$intid))
-year <- sp2$yr1981
 
-baseline.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+N <- nrow(sp)
+y <- abs(sp$phenodiff_base)
+specieschar.hin<- aggregate(sp["phenodiff_base"], sp[c("studyid", "species", "int_type", "terrestrial")], FUN=length) #number of years per species
+specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
+Nspp <- nrow(specieschar.hin)
+species <- as.numeric(as.factor(specieschar.hin$species))
 
+sps<-merge(specieschar.hin, sp, by=c("studyid","species"))
+year <- sp$yr1981
+#nVars <-1
 
-goo <- extract(baseline.model)# dim(fh.sim$b) # number of iterations*number of species 
-
-
-specieschar.formodel <- aggregate(sp2["phenodiff_base"], sp2[c("studyid", "intid")], FUN=length) 
-specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "intid"))
-specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
-intid <- read.csv("input/raw_april.csv", header=TRUE)
-lal<-unique(rawlong.tot[,c("intid","terrestrial")])
-intid2<-merge(intid, lal, by=c("intid"))
-intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
-intid.nodups <- intid.sm[!duplicated(intid.sm),]
-sync_int<-intid.nodups #synchrony change interactions
-
-
-summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "intid")); summ_studyspp<-unique(summ_studyspp)
-summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(intid)),]
-
-#For interactions AND synchrony change
-it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
-for (i in 3000:6000){ # 2000 iterations?
-    it1000[,(i-3000)] <- goo$b[i,]
-       #it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer$model.y #model.x=spp1
-}
-synch.model<-it1000
-summ_studyspp$meanslope<-abs(rowMeans(synch.model)) # take absolute value because we want to know how much relative timing has changed since year 1
-
-*** to compare stan fits to linear fits : scatterplot with 1:1 line (abline(0,1))
-
-#Results
-median(summ_studyspp$meanslope)
-sem<-sd(summ_studyspp$meanslope)/sqrt(length(summ_studyspp$meanslope)); sem
-
-because hist is non-normal use: Bootstrap CI calculations
-boot.ci(boot(summ_studyspp$meanslope,function(x,i) median(x[i]), R=1000))
-OR quantiles of binomial distribution:
-sort(summ_studyspp$meanslope)[qbinom(c(.025,.975), length(summ_studyspp$meanslope), 0.5)]
-
-#95% confidence intervals of the mean
-c(mean(summ_studyspp$meanslope)-2*sem,mean(summ_studyspp$meanslope)+2*sem)
-
-
-print(baseline.model,"b",probs=c(.025,.975))
-
-##### FIGURES #####
-#plot all species
-asdf<-summary(sync.model, pars="b")
-#to get median coefficients from SUMMARY
-median<-asdf[[1]][1:91]; new<-as.data.frame(y); #number of species =91
-d<-data.frame(y=unlist(median), grp=1:length(median)) #-0.715645239
-min<-asdf[[1]][274:364]; e<-data.frame(min=unlist(min)) #-1.1222299
-max<-asdf[[1]][638:728]; f<-data.frame(max=unlist(max)) #-0.316333047
-d$min<-e$min; d$max<-f$max;
-details<-unique(specieschar.formodel[,c("studyid","species","terrestrial")])
-details <- details[with(details, order(species)),]
-d$terrestrial<-details$terrestrial; d$species<-details$species
-
-#asdf[[1]][182:273] #to get sd
-#min<-asdf[[1]][274:364]; min<-as.data.frame(min) #to get 2.5%
-#asdf[[1]][365:455] #to get 25 (-0.658)
-#asdf[[1]][456:546] # to get 50
-#asdf[[1]][547:637] # to get 75
-#max<-asdf[[1]][638:728]; max<-as.data.frame(max) # to get 97.5
-
-d$group <- factor(d$terrestrial, levels = d$terrestrial[order(d$terrestrial)])
-
-ggplot(d, aes(x=factor(species), y=y, ymin=min, ymax=max, colour=terrestrial))+geom_pointrange(aes(width=.05, colour=factor(terrestrial)))+theme_bw()+geom_point(size=3, aes(colour=factor(terrestrial)))+xlab("species")+ylab("Phenological change (doy/year)")+geom_hline(xintercept=0, linetype="longdash", colour="grey")+theme(legend.position="false")+coord_flip()
-
-OR
-ggplot(d, aes(x=factor(species), y=y, ymin=min, ymax=max, colour=terrestrial))+geom_pointrange(aes(width=.05, colour=factor(terrestrial)))+theme_bw()+geom_point(size=3, aes(colour=factor(terrestrial)))+xlab("species")+ylab("Phenological change (doy/year)")+geom_hline(xintercept=0, linetype="longdash", colour="grey")+theme(legend.position="false")+facet_wrap(~terrestrial, scale="free")+theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-______________________________
 EXTRA!!!!
 #to get variance (sd) estimate of slope
 sd_it1000<-matrix(0,ncol=2000, nrow=89)
