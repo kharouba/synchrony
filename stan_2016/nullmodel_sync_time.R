@@ -7,13 +7,19 @@ interact <- read.csv("input/raw_oct.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
 
 
-rawlong.tot2$count<-1
-pre<-subset(rawlong.tot2, year<=1981)
-pres<-merge(pre, unique(rawlong.tot[,c("studyid","intid","species")]), by=c("studyid","species"))
-sss<- aggregate(pres["count"], pres[c("studyid", "intid", "species")], FUN=sum)
+rawlong.tot$count<-1
+pre<-subset(rawlong.tot, year<=1981)
+
+#some species have non-unique data e.g. Glis glis, C
+
+pre_uni<-unique(pre[,c("studyid","year","species","phenovalue","yr1981","count")])
+
+#pres<-merge(pre, unique(rawlong.tot[,c("studyid","intid","species")]), by=c("studyid","species"))
+sss<- aggregate(pre_uni["count"], pre_uni[c("studyid", "species")], FUN=sum)
 sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
 sss2$speciesid<-1:nrow(sss2) #number datas
 
+!!!!!! need to fix below !!!
 pre_cc<-merge(pres[,c(1:4,6)],  sss2, by=c("studyid", "intid", "species"))
 
 #Step 2- Create distribution of means and sd (2)
