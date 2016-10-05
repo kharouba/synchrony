@@ -54,13 +54,13 @@ ddply(dataset, c("studyid", "species", "datasetid"), summarise,
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species", "datasetid"))
 
 # Step 1 in the merge: Get the intid
-rawlong <- read.csv("rawlong.csv", header=TRUE)
+rawlong <- read.csv("/input/rawlong2.csv", header=TRUE)
 sol<-merge(specieschar.formodel.sm, unique(rawlong[,c("studyid","intid")]),
    by=c("studyid"), all.x=TRUE)
 #sol<- sol[with(sol,order(species)),]
 
 # Step 2 in the merge: Get the rest of the info
-intid <- read.csv("input/raw_april.csv", header=TRUE)
+intid <- read.csv("input/raw_oct.csv", header=TRUE)
 intid2 <- merge(intid, unique(sol[,c("studyid","intid", "datasetid")]), by=c("studyid","intid"),
     all.y=TRUE)
 dim(unique(intid2[,c("studyid","intid", "datasetid")]))

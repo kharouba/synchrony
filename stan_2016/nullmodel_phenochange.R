@@ -56,7 +56,7 @@ null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/st
 
 goo <- extract(null.model) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
-intid <- read.csv("input/raw_april.csv", header=TRUE)
+intid <- read.csv("input/raw_oct.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))

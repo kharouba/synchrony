@@ -54,6 +54,8 @@ names(new)[1:18]<-names(rawlong.tot)[1:18]
 
 # Step 5- Run Stan
 new <- new[with(new, order(species)),]
+************************************
+!!!! UPDATE BASED ON NEW SYNCMODELS THAT CLEANS DATASET FIRST 
 N <- nrow(new)
 y <- new$ynull
 specieschar.hin<- aggregate(new["ynull"], new[c("studyid", "species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species

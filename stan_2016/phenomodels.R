@@ -17,13 +17,13 @@ source("/users/kharouba/google drive/UBC/multiplot.R")
 # library(lme4)
 
 #get data
-source("datacleaning.R")
+source("input/datacleaning.R")
 # in the data file: spp1 = neg= negative species e.g. resource
 
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 # setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
 
-rawlong <- read.csv("rawlong.csv", header=TRUE)
+rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
 ##
 # figure out how many unique species
 # and alter the data so each unique species shows up once
@@ -116,7 +116,7 @@ specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"],
     rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
 specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(species)),]
-intid <- read.csv("input/raw_april.csv", header=TRUE)
+intid <- read.csv("input/raw_oct.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
