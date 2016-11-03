@@ -45,6 +45,11 @@ temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","
 
 goo <- extract(temp.model)
 
+#to get mean change- mu_b
+print(temp.model, pars=c("mu_b","sigma_y"))
+#to get credible interval, look at CI with mu_b
+asdf<-summary(temp.model)
+asdf[[1]]
 
 #data <- subset(specieschar.hin, select=c("studyid"))
 data <- unique(dataset[,c("studyid","datasetid","envtype")])
@@ -60,9 +65,13 @@ for (i in 3000:6000){ # 2000 iterations?
 data$stanfit <- rowMeans(temp.change, na.rm=TRUE) #mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
 mean(data$stanfit)
 
-sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
+#sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
 #95% confidence intervals of the mean
-c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
+#c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
+
+#aquatic vs. terrestrial
+with(subset(data, envtype="air"), mean(stanfit))
+
 
 # lizzie checks against some linear models
 idshere <- unique(dataset$datasetid)

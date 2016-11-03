@@ -7,6 +7,7 @@ data{
 	
 	//predictors
 	vector[N] year; 	//year of data point
+	//int<lower=0> year; 
 	
 	//response
 	real y[N]; 		//DOY of pheno event (OR temperature for temperature change model)

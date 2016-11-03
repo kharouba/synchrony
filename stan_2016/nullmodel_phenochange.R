@@ -4,25 +4,26 @@
 
 #Step 1- create pre_climate change dataset
 
-#load rawlong.tot
-rawlong.tot$count<-1
-pre<-subset(rawlong.tot, year<=1981)
-sss<- aggregate(pre["count"], pre[c("studyid", "intid", "species")], FUN=sum)
+#load rawlong.tot2
+rawlong.tot2$count<-1
+pre<-subset(rawlong.tot2, year<=1981)
+sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
 sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
 sss2$speciesid<-1:nrow(sss2) #number datas
 
-pre_cc<-merge(rawlong.tot, sss2, by=c("studyid", "intid", "species"))
+pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
 
 #Step 2- Create distribution of means and sd (2)
-means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "intid", "species")], FUN=mean)
-names(means)[4]<-"mean_doy" #mean of each dataset
-sds <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "intid", "species")], FUN=sd)
-names(sds)[4]<-"sd_doy" #sd of each dataset
+means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=mean)
+names(means)[3]<-"mean_doy" #mean of each dataset
+sds <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=sd)
+names(sds)[3]<-"sd_doy" #sd of each dataset
 
 # FOR EACH species
-clean<-unique(rawlong.tot[,c("studyid","int_type","year","species","phenofreq","short_site","terrestrial","phenovalue","newyear","yr1981","count")])
+#clean<-unique(rawlong.tot[,c("studyid","int_type","year","species","phenofreq","short_site","terrestrial","phenovalue","newyear","yr1981","count")])
+clean<-rawlong.tot2
 Bgroups<-unique(clean$species); b<-Bgroups; b<-as.character(b)
-new<-data.frame(array(0,c(nrow(clean),12)))
+new<-data.frame(array(0,c(nrow(clean),6)))
 rowcount<-1
 for(i in 1:length(b)){
 spp_long<-subset(clean, species==b[i])
@@ -40,19 +41,22 @@ new[rowcount:asdf,]<-spp_long
 rowcount<-rowcount+nrow(spp_long)
 asdf<-rowcount+(nrow(spp_long)-1)
 }
-names(new)[12]<-"ynull"
-names(new)[1:11]<-names(clean)[1:11]
+names(new)[6]<-"ynull"
+names(new)[1:5]<-names(clean)[1:5]
 
 # Step 5- Run Stan
 N <- nrow(new)
 y <- new$ynull
-specieschar.hin<- aggregate(new["ynull"], new[c("studyid", "species", "int_type", "terrestrial")], FUN=length) #number of years per species
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-Nspp <- nrow(specieschar.hin)
+Nspp <- length(unique(new$species))
 species <- as.numeric(as.factor(new$species))
 year <- new$yr1981
 
 null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+print(null.model, pars=c("mu_b","sigma_y"))
+#to get credible interval, look at CI with mu_b
+asdf<-summary(sync.model)
+asdf[[1]]
 
 goo <- extract(null.model) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))

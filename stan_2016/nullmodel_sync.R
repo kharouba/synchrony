@@ -3,23 +3,24 @@
 
 #Step 1- create pre_climate change dataset
 #get interactions ready
-interact <- read.csv("input/raw_april.csv", header=TRUE)
+interact <- read.csv("input/raw_oct.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue)
 
 #load rawlong.tot
-rawlong.tot$count<-1
-pre<-subset(rawlong.tot, year<=1981)
-sss<- aggregate(pre["count"], pre[c("studyid", "intid", "species")], FUN=sum)
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
+rawlong.tot2$count<-1
+pre<-subset(rawlong.tot2, year<=1981)
+sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
 sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
 sss2$speciesid<-1:nrow(sss2) #number datas
 
-pre_cc<-merge(rawlong.tot, sss2, by=c("studyid", "intid", "species"))
+pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
 
 #Step 2- Create distribution of means and sd (2)
-means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "intid", "species")], FUN=mean)
-names(means)[4]<-"mean_doy" #mean of each dataset
-sds <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "intid", "species")], FUN=sd)
-names(sds)[4]<-"sd_doy" #sd of each dataset
+means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=mean)
+names(means)[3]<-"mean_doy" #mean of each dataset
+sds <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=sd)
+names(sds)[3]<-"sd_doy" #sd of each dataset
 
 # FOR EACH INTERACTION
 Bgroups<-unique(rawlong.tot$intid); b<-Bgroups; b<-as.character(b)
@@ -52,26 +53,50 @@ asdf<-rowcount+(nrow(int_long)-1)
 names(new)[19]<-"ynull"
 names(new)[1:18]<-names(rawlong.tot)[1:18]
 
-# Step 5- Run Stan
+# Step 5- clean to match syncmodels code, gets rid of non-unique data for repeating species within a study (i.e. those species across multiple intxns, e.g. Accipiter nisus) so that models for unique species are built, not unique species-intxns ; Number of unique species should match syncmodels i.e. n=85
 new <- new[with(new, order(species)),]
-************************************
-!!!! UPDATE BASED ON NEW SYNCMODELS THAT CLEANS DATASET FIRST 
-N <- nrow(new)
-y <- new$ynull
-specieschar.hin<- aggregate(new["ynull"], new[c("studyid", "species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-Nspp <- nrow(specieschar.hin)
-J <- nrow(specieschar.hin)
-species <- as.numeric(as.factor(new$species))
-new$yr1981 <- new$newyear-1981
-year <- new$yr1981
+Bgroups<-unique(new$species); b<-Bgroups; b<-as.character(b)
+evennewer<-data.frame(array(0,c(nrow(new)*54,19)))
+rowcount<-1
+
+for(i in 1:length(b)){
+spp<-subset(new, species==b[i])
+asdf<-rowcount+(nrow(spp)-1)
+
+if(length(unique(spp$intid))==1){
+	evennewer[rowcount:asdf,]<-spp
+	rowcount<-rowcount+nrow(spp)
+	#asdf<-rowcount+(nrow(spp)-1)
+}
+if(length(unique(spp$intid))>1){
+	cgroups<-unique(spp$intid); c<-cgroups; c<-as.character(c)
+	j<-sample(length(unique(spp$intid)), size=1)
+	spp2<-subset(spp, intid==c[j])
+	asdf<-rowcount+(nrow(spp2)-1)
+	evennewer[rowcount:asdf,]<-spp2
+	rowcount<-rowcount+nrow(spp2)
+}
+}
+names(evennewer)<-names(new)
+evennewer2<-subset(evennewer, studyid!=0)
+
+
+
+# step 6- Run Stan
+N <- nrow(evennewer2)
+y <- evennewer2$ynull
+Nspp <- length(unique(evennewer2$species))
+J <- length(unique(evennewer2$species))
+species <- as.numeric(as.factor(evennewer2$species))
+year <- evennewer2$yr1981
+
 
 null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 goo <- extract(null.model) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
 specieschar.formodel.sm <- specieschar.formodel.sm[with(specieschar.formodel.sm, order(species)),]
-intid <- read.csv("input/raw_april.csv", header=TRUE)
+intid <- read.csv("input/raw_oct.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
@@ -147,13 +172,21 @@ all$count_diff<-with(all, count-total)
 sub<-subset(tog, intid=="1" | intid=="175" | intid=="235")
 sub$meanchange<--sub$meanchange
 sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
-tog<-rbind(sub, sub2)
+tog<-rbind(sub, sub2); nrow(tog)
+
+!! double check sample size !!
 
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
 #computation of the standard error of the mean
 sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
 #95% confidence intervals of the mean
 c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
+
+## Magnitude
+mean(abs(tog$meanchange), na.rm=TRUE) #
+sem<-sd(abs(tog$meanchange))/sqrt(length(abs(tog$meanchange))); sem
+#95% confidence intervals of the mean
+c(mean(abs(tog$meanchange))-2*sem,mean(abs(tog$meanchange))+2*sem)
 
 ### Extra
 sub<-subset(rawlong, intid=="1")

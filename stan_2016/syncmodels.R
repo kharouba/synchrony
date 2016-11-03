@@ -23,7 +23,7 @@ source("input/datacleaning.R")
 # in the data file: spp1 = neg= negative species e.g. resource 
 
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
-#new changes to data (Oct 2016): No longer unique: Caterpillar 2a, 2b, 2c, 2d; Daphnia 3a, 3b; Paurs 2a, 2b caeruleus; Pyg. antarcticus a and b
+#new changes to data (Oct 2016): No longer unique: Caterpillar 2a, 2b, 2c, 2d; Daphnia 3a, 3b; Paurs 2a, 2b caeruleus; Pyg. antarcticus a and b; Caterpillar4 now 4a and 4b
 
 
 ##
@@ -77,7 +77,7 @@ rawlong.tot<-rbind(hinge_non, hinges)
 # prep the data to fit the model including:
 # aggregate to get species level characteristics
 # subset down to the phenovalues
-# Run stan on unique species (n=85)
+# Run stan on unique species (n=86)
 # (old) Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
@@ -90,10 +90,6 @@ y <- rawlong.tot2$phenovalue
 Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
 species <- as.numeric(as.factor(rawlong.tot2$species))
 year <- rawlong.tot2$yr1981
-
-#specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
-#specieschar.hin <- specieschar.hin[with(specieschar.hin, order(intid)),]
-#specieschar.hin2<-unique(specieschar.hin$species)
 
 
 #New model as of June 2016
@@ -191,11 +187,15 @@ all$count_diff<-with(all, count-total)
 sub<-subset(tog, intid=="1" | intid=="175" | intid=="235")
 sub$meanchange<--sub$meanchange
 sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
-tog<-rbind(sub, sub2) #### FINAL SYNCHRONY DATASET
+tog<-rbind(sub, sub2); nrow(tog) #### FINAL SYNCHRONY DATASET
 
 #KEY RESULT:
 #Direction and magnitude
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
+number decreasing: 
+sub<-subset(tog, meanchange<0); nrow(sub)
+number increasing:
+sub<-subset(tog, meanchange>0); nrow(sub)
 #computation of the standard error of the mean
 sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
 #95% confidence intervals of the mean
@@ -203,16 +203,57 @@ c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
 
 #Magnitude only
 mean(abs(tog$meanchange), na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
-sem<-sd(abs(tog$meanchange)/sqrt(length(abs(tog$meanchange))); sem
+sem<-sd(abs(tog$meanchange)/sqrt(length(abs(tog$meanchange)))); sem
 #95% confidence intervals of the mean
 c(mean(abs(tog$meanchange))-2*sem,mean(abs(tog$meanchange))+2*sem)
 
-#by group
-sub<-subset(tog, terrestrial=="terrestrial"); mean(sub$meanchange); sd(sub$meanchange)
-sub<-subset(tog, terrestrial=="aquatic"); mean(sub$meanchange); mean(sub$meanchange); sd(sub$meanchange)
-sem<-with(sub, sd(meanchange)/sqrt(length(meanchange))); sem
+#by group- magnitude
+sub<-subset(tog, terrestrial=="terrestrial"); mean(abs(sub$meanchange)); sd(abs(sub$meanchange))
+sub<-subset(tog, terrestrial=="aquatic"); mean(abs(sub$meanchange)); sd(abs(sub$meanchange))
+sem<-with(sub, sd(abs(meanchange))/sqrt(length(abs(meanchange)))); sem
 #95% confidence intervals of the mean
 with(sub, c(mean(meanchange)-2*sem,mean(meanchange)+2*sem))
+
+#Covariates
+rawlong.tot$count<-1
+startdate<-aggregate(rawlong.tot["year"], rawlong.tot[c("studyid", "intid")], FUN=min); names(startdate)[3]<-"minyear"
+ts_length<-aggregate(rawlong.tot["count"], rawlong.tot[c("studyid", "intid","spp")], FUN=sum); names(ts_length)[4]<-"length"
+cov<-merge(startdate, unique(ts_length[,c("studyid","intid","length")]), by=c("studyid","intid"))
+covs<-merge(cov, unique(rawlong.tot[,c("studyid","intid","phenofreq")]), by=c("studyid","intid"))
+tog2<-merge(tog, covs, by=c("studyid","intid"))
+tog2$minyr1981<-tog2$minyear-1981
+
+#stan
+# multiple factor model
+N <- nrow(tog2)
+y <- abs(tog2$meanchange)
+Nspp <- length(unique(tog2$studyid)) #newid is character !
+species <- as.numeric(as.factor(tog2$studyid))
+p<-4 #number of predictors +1
+desMat <- model.matrix(object = ~ 1 + minyr1981 + phenofreq + length, data = tog2)
+
+cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomeffects_cov.stan", data=c("N","Nspp","y","species","p", "desMat"), iter=3000, chains=4)
+
+OR
+#single factor model
+#year<-tog2$phenofreq #HOW TO CODE CATEGORICAL??? I think int is ok
+m<-desMat[,3]; year<-as.vector(t(m)); 
+year<-tog2$length
+year<-as.numeric(tog2$minyr1981)
+
+>1981
+tog3<-subset(tog2, minyear>1981)
+N <- nrow(tog3)
+y <- abs(tog3$meanchange)
+Nspp <- length(unique(tog3$studyid)) #newid is character !
+species <- as.numeric(as.factor(tog3$studyid))
+year<-as.numeric(tog3$minyear)
+
+cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomeffects.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
+
+---
 
 library(grid)
 text_high <- textGrob("Smaller interval", gp=gpar(fontsize=13, fontface="bold"))
@@ -231,11 +272,12 @@ summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations fo
 
 asdf<-summary(sync.model, pars="b")
 #to get median coefficients from SUMMARY
-median<-asdf[[1]][1:85]; new<-as.data.frame(y); #number of species =91
+median<-asdf[[1]][1:85]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
 min<-asdf[[1]][256:340]; e<-data.frame(min=unlist(min)) #-1.129 to -1.022
 max<-asdf[[1]][596:680]; f<-data.frame(max=unlist(max)) #-0.3077 to 0.14
 d$min<-e$min; d$max<-f$max;
+
 
 summ_studyspp$min<-d$min; summ_studyspp$max<-d$max; summ_studyspp$median<-d$y
 

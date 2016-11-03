@@ -77,14 +77,13 @@ rawlong.tot<-rbind(hinge_non, hinges)
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
 rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
-N <- nrow(rawlong.tot)
-y <- rawlong.tot$phenovalue
-specieschar.hin<- aggregate(rawlong.tot["phenovalue"], rawlong.tot[c("studyid","intid","species", "int_type", "terrestrial", "spp")], FUN=length) #number of years per species
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-specieschar.hin2 <- unique(specieschar.hin$species)
-Nspp <- length(specieschar.hin2)
-species <- as.numeric(as.factor(rawlong.tot$species))
-year <- rawlong.tot$yr1981
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
+N <- nrow(rawlong.tot2)
+y <- rawlong.tot2$phenovalue
+
+Nspp <- length(unique(rawlong.tot2$species))
+species <- as.numeric(as.factor(rawlong.tot2$species))
+year <- rawlong.tot2$yr1981
 #nVars <-1
 # get ecosystem for each species
 specieschar.hin3 <- subset(specieschar.hin, select=c("species", "terrestrial"))
@@ -97,6 +96,16 @@ Neco <- length(unique(specieschar.hin4$terrestrial))
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+
+#to get mean change- mu_b
+print(sync.model, pars=c("mu_b","sigma_y"))
+#to get credible interval, look at CI with mu_b
+asdf<-summary(sync.model)
+asdf[[1]]
+
+#aquatic vs terrestrial differences
+uni<-unique(rawlong.tot[,c("studyid","species","terrestrial")])
 
 ## ADD ECOSYSTEM here, note model totally does not converge!
 # current error: Error : variable does not exist; processing stage=data initialization; variable name=p; base type=int
