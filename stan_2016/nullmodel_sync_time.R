@@ -20,7 +20,7 @@ intid.nodups <- intid.sm[!duplicated(intid.sm),]
 
 
 #Step 1- create pre_climate change dataset
-#load rawlong.tot
+#load rawlong.tot from syncmodels.R
 rawlong.tot$count<-1
 pre<-subset(rawlong.tot, year<=1981)
 sums<-unique(rawlong.tot[,c("studyid","intid","species")])
@@ -35,16 +35,10 @@ sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
 sss2$speciesid<-1:nrow(sss2) #number datas
 
 pre_cc<-merge(pre_uni[,1:5], sss2, by=c("studyid","species"))
-#pre_cc2<-merge(pre_cc, unique(rawlong.tot[,c("studyid","intid","species")]), by=c("studyid","species"))
-#pre_cc2 <- pre_cc2[with(pre_cc2, order(species, year)),]
-#pre_cc<-merge(pres[,c(1:4,6)],  sss2, by=c("studyid", "intid", "species"))
 
-OR Use all data
-rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
-pre_cc<-rawlong.tot2
-
-
-!!! Manual up to here!!
+#OR Use all data
+#rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
+#pre_cc<-rawlong.tot2
 
 
 #Step 2- Create distribution of means and sd (2)
@@ -198,6 +192,7 @@ lols<-merge(lol, lol2, by="length")
 ggplot(lols, (aes(x=factor(length), y=mean)))+geom_errorbar(aes(ymin=mean-se, ymax=mean+se, width=.0025, colour="black"))+geom_point()+theme(legend.position="false")+geom_hline(yintercept=0, linetype="dashed")+ggtitle("Mean synchrony change +/-SE")
 
 #####
+EXTRA
 sem<-sd(abs(tog$meanchange)/sqrt(length(abs(tog$meanchange))); sem
 #95% confidence intervals of the mean
 c(mean(abs(tog$meanchange))-2*sem,mean(abs(tog$meanchange))+2*sem)
