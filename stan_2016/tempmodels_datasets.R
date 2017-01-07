@@ -22,12 +22,15 @@ library(dplyr)
 # set_cppo("fast") 
 
 ## source the temp dataset cleaning code
+source("source/clean_tempdatasets2.R")
 
-source("source/clean_tempdatasets.R")
+# make sure temp change is getting calculated over same years as synch data
+rawyrs<-unique(rawlong.tot[,c("studyid","species""year")])
+rawyrs<-merge(unique(rawlong.tot[,c("studyid","species","year")]), dataset, by=c("studyid","species","year"))
+dataset<-rawyrs
 
 # check, which datasetids have more than one species
-ddply(dataset, c("datasetid"), summarise,
-    nspp=n_distinct(species))
+ddply(dataset, c("datasetid"), summarise, nspp=n_distinct(species))
 
 #dataset<-unique(clim3[,c("studyid","year","envfactor","envunits","envtype","envvalue","newyear","yr1981")])
 dataset <- dataset[with(dataset, order(datasetid)),]
@@ -65,9 +68,9 @@ for (i in 3000:6000){ # 2000 iterations?
 data$stanfit <- rowMeans(temp.change, na.rm=TRUE) #mean across iterations for EACH dataset; STAN SLOPE ESTIMATE PER dataset
 mean(data$stanfit)
 
-#sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
+sem<-sd(data$stanfit)/sqrt(length(data$stanfit)); sem
 #95% confidence intervals of the mean
-#c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
+c(mean(data$stanfit)-2*sem,mean(data$stanfit)+2*sem)
 
 #aquatic vs. terrestrial
 with(subset(data, envtype="air"), mean(stanfit))

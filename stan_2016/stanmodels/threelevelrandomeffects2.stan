@@ -11,19 +11,19 @@
 
 data{
 //counters
-	int<lower=0> N; 		//LEVEL 1: number of observations (2000 iterations * number of interactions)
-	int<lower=0> Nspp; 		//LEVEL 2: number of interactions (i.e. grouping factor)
+	int<lower=0> N; 		//LEVEL 1: number of observations (2000 iterations * number of spp)
+	int<lower=0> Nspp; 		//LEVEL 2: number of species (i.e. grouping factor)
 	int<lower=0> Nstudy; 	//LEVEL 3: number of studies (i.e. grouping factor)
-	int<lower=0> p;	 //Number of fixed effect parameters + intercept
+//	int<lower=0> p;	 //Number of fixed effect parameters + intercept
 	
 //Group ids
-	int<lower=1> species[N];			//interaction identity
-	int<lower=1> studyid[Nspp]; 	//vector of uNque studyids for each species	
+	int<lower=1> species[N];			//spp identity
+	int<lower=1> studyid[Nspp]; 	//vector of unique studyids for each species	
 	
 // predictors
 //vector[N] temp; //temp change of interaction; Continuous
-	real desMat[N,p]; //Design matrix
-	//vector[N] year; 	//year of data point
+//real desMat[N,p]; //Design matrix
+	vector[N] year; 	//year of data point
 
 // response
 	real y[N]; 		//mean synch change for each interaction; Continuous
@@ -32,11 +32,12 @@ data{
 
 parameters{
 	//Fixed effects
-	//real mu_a[p];  // population/overall intercept
+	//Level 1:
 	real mu_a;  // population/overall intercept
 	real mu_b;  // population/overall slope- here for temperature effect (need one for each predictor)
-	//real mu_b[p];
 	real<lower=0> sigma_y; 		// measurement error, noise etc. (Level 1) population sd
+	//real mu_b[p];
+	//real mu_a[p];  // population/overall intercept
 	
 	//LEVEL 2: interaction or species level
 	real a_spp[Nspp]; 		//the intercept for each species (random effect)
@@ -79,13 +80,16 @@ transformed parameters{
 	
 	//Level 1, Individual mean
 	for (i in 1:N){
-		ypred[i]<-beta_a_spp[species[i]]+beta_b_spp[species[i]]*desMat[i,p];
+		ypred[i]<-beta_a_spp[species[i]]+beta_b_spp[species[i]]*year[i];
+		//ypred[i]<-beta_a_spp[species[i]]+beta_b_spp[species[i]]*desMat[i,p];
 	}
 }
 
 model{
 	//Prior part of Bayesian inference
 	//Random effects distribution
+	
+NEED TO FIX BELOW!!!
 	a_study~normal(a_study, sigma_a_study); //intercept for indiv study (level 3)
 	a_spp~normal(a_spp, sigma_a_spp); //intercept for indivi interaction (level 2)
 	

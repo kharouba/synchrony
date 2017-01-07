@@ -1,5 +1,4 @@
-// 	three-level random intercept model
-
+//3 level intercept model (with fixed effect covariates)
 ## data {
 ##   // Define variables in data
 ##   // Number of level-1 observations (an integer)
@@ -83,4 +82,4 @@
 ##   for (i in 1:Ni) {
 ##     mathgain[i] ~ normal(mu[i], sigma_e0);
 ##   }
-}
+## }

@@ -60,6 +60,18 @@ Nstudy           = length(unique(classroom$schoolid))
 species      = classroom$classid
 studyid = schoolLookupVec
 year<- classroom$mathgain
+p            = ncol(desMat)
+desMat       = desMat
+
+Ni          = length(unique(classroom$childid))
+Nj           = length(unique(classroom$classid))
+Nk           = length(unique(classroom$schoolid))
+classid      = classroom$classid
+schoolid = schoolLookupVec
+year<- classroom$mathgain
+p            = ncol(desMat)
+desMat       = desMat
+
 
 fit_simple<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/threelevelrandomintercept.stan", data=c("N","Nspp","Nstudy","species", "studyid","year"), iter=2000, chains=4)
 

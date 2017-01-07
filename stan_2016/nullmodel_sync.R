@@ -15,6 +15,8 @@ sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
 sss2$speciesid<-1:nrow(sss2) #number datas
 
 pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
+pre_cc<-subset(pre_cc, year<=1981)
+
 
 #Step 2- Create distribution of means and sd (2)
 means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=mean)
@@ -53,7 +55,7 @@ asdf<-rowcount+(nrow(int_long)-1)
 names(new)[19]<-"ynull"
 names(new)[1:18]<-names(rawlong.tot)[1:18]
 
-# Step 5- clean to match syncmodels code, gets rid of non-unique data for repeating species within a study (i.e. those species across multiple intxns, e.g. Accipiter nisus) so that models for unique species are built, not unique species-intxns ; Number of unique species should match syncmodels i.e. n=85
+# Step 5- clean to match syncmodels code, gets rid of non-unique data for repeating species within a study (i.e. those species across multiple intxns, e.g. Accipiter nisus) so that models for unique species are built, not unique species-intxns ; Number of unique species should match syncmodels i.e. n=86
 new <- new[with(new, order(species)),]
 Bgroups<-unique(new$species); b<-Bgroups; b<-as.character(b)
 evennewer<-data.frame(array(0,c(nrow(new)*54,19)))
@@ -81,7 +83,6 @@ names(evennewer)<-names(new)
 evennewer2<-subset(evennewer, studyid!=0)
 
 
-
 # step 6- Run Stan
 N <- nrow(evennewer2)
 y <- evennewer2$ynull
@@ -94,31 +95,23 @@ year <- evennewer2$yr1981
 null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 goo <- extract(null.model) 
-specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species"))
-specieschar.formodel.sm <- specieschar.formodel.sm[with(specieschar.formodel.sm, order(species)),]
+specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"], rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
+specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
+specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
 intid <- read.csv("input/raw_oct.csv", header=TRUE)
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
 intid2<-merge(intid, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
 intid.nodups <- intid.sm[!duplicated(intid.sm),]
-intid.nodups <- intid.nodups[with(intid.nodups, order(species)),]
-intid.nodups<-na.omit(intid.nodups)
-sync_int<-intid.nodups #synchrony change interactions
+#sync_int<-intid.nodups #synchrony change interactions
+
 
 summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
+summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 
-## To estimate pheno change per species
-#it1000 <- matrix(0, ncol=3000, nrow=Nspp)
-#for (i in 3000:6000){ # 3000 iterations?
-#    summ_studyspp$model <- goo$b[i,]
-#    it1000[,(i-3000)] <- goo$b[i,]
-#}
-#summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
-#mean(summ_studyspp$stanfit) 
-
-## TO measure synchrony change
+#For interactions AND synchrony change
 it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
-for (i in 3000:6000){ # 3000 iterations?
+for (i in 3000:6000){ # 2000 iterations?
     summ_studyspp$model <- goo$b[i,]
     andtheanswer <- merge(intid.nodups, summ_studyspp, by.x=c("studyid", "spp1"),
         by.y=c("studyid", "species"), all.x=TRUE)
@@ -126,8 +119,9 @@ for (i in 3000:6000){ # 3000 iterations?
         by.y=c("studyid", "species"), all.x=TRUE)
     it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer$model.y #model.x=spp1
 }
-
 synch.model<-it1000
+
+
 
 # FOR INTERPRETATION
 meanchange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH INTXN
@@ -136,7 +130,7 @@ andtheanswer$meanchange<-meanchange
 #Positive difference= increasing synchrony ()
 # spp1 = negative species in trophic interaction and spp2= positive species
 
-interact <- read.csv("input/raw_april.csv", header=TRUE)
+interact <- read.csv("input/raw_oct.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
 #positive phenodiff= consumer emerges BEFORE resource
 #negative phenodiff= resource emerges BEFORE consumer
@@ -155,25 +149,9 @@ dec2<-subset(andtheanswer2, newphenodiff<0 & meanchange<0)
 dec<-rbind(dec1, dec2)
 dec$meanchange<-abs(dec$meanchange)
 dec$meanchange<--dec$meanchange
-tog<-rbind(dec, inc)
+tog<-rbind(dec, inc); nrow(tog)
 
-
-#to calculate mismatch
-interact$count<-1
-length<-aggregate(interact["count"], interact[c("studyid", "intid")], FUN=sum)
-names(length)[3]<-"total"
-neg<-subset(interact, newphenodiff<0)
-length_neg<-aggregate(neg["count"], neg[c("studyid", "intid")], FUN=sum)
-close<-merge(length, length_neg, by=c("studyid","intid"))
-all<-merge(andtheanswer2, close, by=c("studyid","intid"))
-all$count_diff<-with(all, count-total)
-
-#fix mismatchs
-sub<-subset(tog, intid=="1" | intid=="175" | intid=="235")
-sub$meanchange<--sub$meanchange
-sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
-tog<-rbind(sub, sub2); nrow(tog)
-
+!! IGNORING MISMATCHES BECAUSE SHOULDNT BE ANY 
 !! double check sample size !!
 
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
@@ -187,6 +165,15 @@ mean(abs(tog$meanchange), na.rm=TRUE) #
 sem<-sd(abs(tog$meanchange))/sqrt(length(abs(tog$meanchange))); sem
 #95% confidence intervals of the mean
 c(mean(abs(tog$meanchange))-2*sem,mean(abs(tog$meanchange))+2*sem)
+
+Histogram figures
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+ggplot(tog, aes(x=meanchange))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.054, linetype="solid",size=1)+geom_vline(xintercept=0.0022, linetype=2,size=1)+geom_xlim(-1.5, 1.5)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
+
+
+ggplot(tog, aes(x=meanchange))+geom_histogram(position="identity", colour="black")+theme_bw()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+xlim(-1.5, 1.5)+geom_vline(xintercept=0, linetype="solid",size=1)
+
 
 ### Extra
 sub<-subset(rawlong, intid=="1")

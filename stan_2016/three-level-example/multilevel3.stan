@@ -1,4 +1,13 @@
-4
+## data {
+##   // Define variables in data
+##   // Number of level-1 observations (an integer)
+##   int<lower=0> Ni;
+##   // Number of level-2 clusters
+##   int<lower=0> Nj;
+##   // Number of level-3 clusters
+##   int<lower=0> Nk;
+## 
+##   // Cluster IDs
 ##   int<lower=1> classid[Ni];
 ##   int<lower=1> schoolid[Ni];
 ## 

@@ -23,7 +23,7 @@ ndata<-melt(synch.model[,2001:3000])
 names(ndata)[1]<-"id"; names(ndata)[2]<-"iteration"; names(ndata)[3]<-"sync.change"; 
 ndata$intid<-rep(intid.nodups$intid, 1000) # 1,19,144,145 x3000
 
-interact <- read.csv("input/raw_april.csv", header=TRUE)
+interact <- read.csv("input/raw_oct.csv", header=TRUE)
 interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
 #positive phenodiff= consumer emerges BEFORE resource
 #negative phenodiff= resource emerges BEFORE consumer
@@ -101,4 +101,9 @@ data$stan<-colMeans(goo$b)
 print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
 
 
+#Figure
+data1<-aggregate(tryme["sync.change"], list(tryme[,c("intid")]), FUN=mean)
+data2<-aggregate(tryme["temp.change"], list(tryme[,c("intid")]), FUN=mean)
+data3<-merge(data1, data2, by=c("Group.1"))
 
+ggplot(data3, aes(y=abs(sync.change),x=temp.change))+geom_point(size=3)+theme(text = element_text(size=20), axis.text.x=element_text(size=20), axis.title.y=element_text(size=20, angle=90))+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")

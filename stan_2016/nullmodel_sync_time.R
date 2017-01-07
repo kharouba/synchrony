@@ -36,6 +36,9 @@ sss2$speciesid<-1:nrow(sss2) #number datas
 
 pre_cc<-merge(pre_uni[,1:5], sss2, by=c("studyid","species"))
 
+
+DOUBLE CHECK ONLY PRE_CC YEARS INCLUDED!!!
+
 #OR Use all data
 #rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
 #pre_cc<-rawlong.tot2

@@ -9,10 +9,11 @@ options(stringsAsFactors = FALSE)
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 library(ggplot2)
 library(rstan)
-library(shinyStan)
+library(shinystan)
 library(grid)
 library(nlme)
 library(dplyr)
+library(ggrepel)
 set_cppo("fast")  # for best running speed
 source("/users/kharouba/google drive/UBC/multiplot.R")
 #library(reshape)
@@ -24,6 +25,23 @@ source("input/datacleaning.R")
 
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
 #new changes to data (Oct 2016): No longer unique: Caterpillar 2a, 2b, 2c, 2d; Daphnia 3a, 3b; Paurs 2a, 2b caeruleus; Pyg. antarcticus a and b; Caterpillar4 now 4a and 4b
+rawlong<-subset(rawlong, species!="asdf1" & species!="asdf2")
+#asdf1= Diatom2b, asdf2= Thermocyclops oithonoides but first stage, in analysis now, last phenophase
+
+
+#fix for Diatom4 spp. Dec 2016
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="194");
+sub[,c("species")]<-"Diatom4a spp."
+rawlong<-rbind(rawlong, sub)
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="195");
+sub[,c("species")]<-"Diatom4b spp."
+rawlong<-rbind(rawlong, sub)
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="196");
+sub[,c("species")]<-"Diatom4c spp."
+rawlong<-rbind(rawlong, sub)
+rawlong<-subset(rawlong, species!="Diatom4 spp.")
+
+
 
 
 ##
@@ -77,13 +95,31 @@ rawlong.tot<-rbind(hinge_non, hinges)
 # prep the data to fit the model including:
 # aggregate to get species level characteristics
 # subset down to the phenovalues
-# Run stan on unique species (n=86)
+# Run stan on unique species (n=88)
 # (old) Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
 rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
 #rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
 #rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981","year")]) #CLEAN UP so only unique values across repeating species within studoes
+N <- nrow(rawlong.tot2)
+y <- rawlong.tot2$phenovalue
+Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
+species <- as.numeric(as.factor(rawlong.tot2$species))
+year <- rawlong.tot2$yr1981
+
+#Just on pre_cc data 
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
+rawlong.tot2$count<-1
+pre<-subset(rawlong.tot2, year<=1981)
+sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
+sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
+sss2$speciesid<-1:nrow(sss2) #number datas
+pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
+pre_cc<-subset(pre_cc, year<=1981)
+rawlong.tot<-pre_cc
+rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
 N <- nrow(rawlong.tot2)
 y <- rawlong.tot2$phenovalue
@@ -109,12 +145,24 @@ fh.sim$b[2000,]
 specieschar.formodel <- aggregate(rawlong.nodups["phenovalue"], rawlong.nodups[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
 specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
-intid <- read.csv("input/raw_oct.csv", header=TRUE)
+intid_full <- read.csv("input/raw_oct.csv", header=TRUE)
+#fix for diatom4 spp. (Dec 2016)
+sub<-subset(intid_full, intid=="194");
+sub[,c("spp1")]<-"Diatom4a spp."
+intid_full<-rbind(intid_full, sub)
+sub<-subset(intid_full, intid=="195");
+sub[,c("spp1")]<-"Diatom4b spp."
+intid_full<-rbind(intid_full, sub)
+sub<-subset(intid_full, intid=="196");
+sub[,c("spp1")]<-"Diatom4c spp."
+intid_full<-rbind(intid_full, sub)
+intid_full<-subset(intid_full, spp1!="Diatom4 spp.")
+intid_full<-subset(intid_full, spp1!="asdf1" & spp2!="asdf2")
+
 lal<-unique(rawlong.tot[,c("intid","terrestrial")])
-intid2<-merge(intid, lal, by=c("intid"))
+intid2<-merge(intid_full, lal, by=c("intid"))
 intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
 intid.nodups <- intid.sm[!duplicated(intid.sm),]
-#sync_int<-intid.nodups #synchrony change interactions
 
 
 summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
@@ -151,11 +199,10 @@ synch.model<-it1000
 meanchange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH INTXN
 andtheanswer$meanchange<-meanchange
 
-interact <- read.csv("input/raw_oct.csv", header=TRUE)
-interact$newphenodiff<- with(interact, neg_phenovalue-pos_phenovalue) #spp1-spp2
+intid_full$newphenodiff<- with(intid_full, neg_phenovalue-pos_phenovalue) #spp1-spp2
 #positive phenodiff= consumer emerges BEFORE resource
 #negative phenodiff= resource emerges BEFORE consumer
-season <- aggregate(interact["newphenodiff"], interact[c("studyid", "intid")], FUN=mean)
+season <- aggregate(intid_full["newphenodiff"], intid_full[c("studyid", "intid")], FUN=mean)
 
 andtheanswer2<-merge(andtheanswer, season, by=c("studyid","intid"))
 
@@ -174,10 +221,10 @@ tog<-rbind(dec, inc)
 
 
 #to calculate mismatch
-interact$count<-1
-length<-aggregate(interact["count"], interact[c("studyid", "intid")], FUN=sum)
+intid_full$count<-1
+length<-aggregate(intid_full["count"], intid_full[c("studyid", "intid")], FUN=sum)
 names(length)[3]<-"total"
-neg<-subset(interact, newphenodiff<0)
+neg<-subset(intid_full, newphenodiff<0)
 length_neg<-aggregate(neg["count"], neg[c("studyid", "intid")], FUN=sum)
 close<-merge(length, length_neg, by=c("studyid","intid"))
 all<-merge(andtheanswer2, close, by=c("studyid","intid"))
@@ -192,14 +239,19 @@ tog<-rbind(sub, sub2); nrow(tog) #### FINAL SYNCHRONY DATASET
 #KEY RESULT:
 #Direction and magnitude
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
-number decreasing: 
+!number decreasing: 
 sub<-subset(tog, meanchange<0); nrow(sub)
-number increasing:
+!number increasing:
 sub<-subset(tog, meanchange>0); nrow(sub)
 #computation of the standard error of the mean
 sem<-sd(tog$meanchange)/sqrt(length(tog$meanchange)); sem
 #95% confidence intervals of the mean
 c(mean(tog$meanchange)-2*sem,mean(tog$meanchange)+2*sem)
+
+#by group- with direction and magnitude
+sub<-subset(tog, terrestrial=="terrestrial"); mean(sub$meanchange); sd(sub$meanchange)
+sub<-subset(tog, terrestrial=="aquatic"); mean(sub$meanchange); sd(sub$meanchange)
+
 
 #Magnitude only
 mean(abs(tog$meanchange), na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
@@ -254,14 +306,25 @@ cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/sta
 print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
 
 ---
-
+#FIGURES
+# All groups together
 library(grid)
-text_high <- textGrob("Smaller interval", gp=gpar(fontsize=13, fontface="bold"))
-text_low <- textGrob("Larger interval", gp=gpar(fontsize=13, fontface="bold"))
-ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=2, xmax=2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-2, xmax=-2, ymin=-0.5, ymax=-0.5)
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+a<-ggplot(tog, aes(x=meanchange))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.052, linetype="solid",size=1)+geom_vline(xintercept=0.0053, linetype=2,size=1)+annotation_custom(text_high, xmin=1.2, xmax=1.2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+
+#Magnitude
+ggplot(tog, aes(x=abs(meanchange)))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0.44, linetype="solid",size=1)+geom_vline(xintercept=0.042, linetype=2,size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
+
+
+#Aquatic vs. terrestrial
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
+
 
 #Link to individual species
-tog<-tog[,c(1:6,9:10)]
+tog2<-tog[,c(1:6,9:10)]
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
     summ_studyspp$model <- fh.sim$b[i,]
@@ -272,10 +335,10 @@ summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations fo
 
 asdf<-summary(sync.model, pars="b")
 #to get median coefficients from SUMMARY
-median<-asdf[[1]][1:85]; #new<-as.data.frame(y); #number of species =91
+median<-asdf[[1]][1:88]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
-min<-asdf[[1]][256:340]; e<-data.frame(min=unlist(min)) #-1.129 to -1.022
-max<-asdf[[1]][596:680]; f<-data.frame(max=unlist(max)) #-0.3077 to 0.14
+min<-asdf[[1]][265:352]; e<-data.frame(min=unlist(min)) #-1.129 to -1.00
+max<-asdf[[1]][617:704]; f<-data.frame(max=unlist(max)) #-0.3109 to 0.125
 d$min<-e$min; d$max<-f$max;
 
 
@@ -291,9 +354,23 @@ indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit"
 # Figure - RElationship between individual species change and synchrony change. Showing stan slope estimates with 95% credible intervals.
 tryagain<-merge(summ_studyspp, unique(rawlong.tot[,c("intid","species","spp")]), by="species")
 tryagain<-merge(tryagain, tog[,c("studyid","intid","meanchange")], by=c("studyid","intid"))
+uni<-as.data.frame(unique(tryagain$species))
+uni$label<-1:nrow(uni); names(uni)[1]<-"species"
+tryagain<-merge(tryagain, uni, by=c("species"))
 
-ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = intid))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=abs(meanchange), shape=factor(spp)))+theme_bw()+theme()+xlab("interactions")+ylab("phenological change")+coord_flip()+scale_colour_continuous(name="abs(mean change)")+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))
-#ggtitle("Stan slope estimates with 95% credible intervals")
+#sub1$label<-letters
+
+#NEWEST :#ggtitle("Stan slope estimates with 95% credible intervals")
+#text_high <- textGrob("Smaller change", gp=gpar(fontsize=10, fontface="bold"))
+#text_low <- textGrob("Larger change", gp=gpar(fontsize=10, fontface="bold"))
+b<-ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=factor(spp), shape=factor(spp)))+theme_bw()+theme(legend.position=c(.85, .1))+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+scale_color_discrete(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=8), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)
+multiplot(a,b, cols=2)
+
+##OLDER version
+ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=abs(meanchange), shape=factor(spp)))+theme_bw()+theme()+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_colour_continuous(name="abs(synchrony change)")+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=10), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)
+#geom_label_repel()
+#+geom_text(hjust=3)
+
 
 #Appendix
 startdate<-aggregate(rawlong.tot["year"], rawlong.tot[c("studyid", "intid")], FUN=min)

@@ -24,6 +24,27 @@ setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 # setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
 
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
+
+rawlong<-subset(rawlong, species!="asdf1" & species!="asdf2")
+#asdf1= Diatom2b, asdf2= Thermocyclops oithonoides but first stage, in analysis now, last phenophase
+
+
+#fix for Diatom4 spp. Dec 2016
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="194");
+sub[,c("species")]<-"Diatom4a spp."
+rawlong<-rbind(rawlong, sub)
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="195");
+sub[,c("species")]<-"Diatom4b spp."
+rawlong<-rbind(rawlong, sub)
+sub<-subset(rawlong, species=="Diatom4 spp." & intid=="196");
+sub[,c("species")]<-"Diatom4c spp."
+rawlong<-rbind(rawlong, sub)
+rawlong<-subset(rawlong, species!="Diatom4 spp.")
+
+
+
+
+
 ##
 # figure out how many unique species
 # and alter the data so each unique species shows up once

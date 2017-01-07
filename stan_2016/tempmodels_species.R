@@ -2,11 +2,14 @@
 
 rm(list=ls()) 
 
+library(reshape)
+
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 
+#load rawlong.tot from syncmodels.
 
 #step 1- sync climate and pheno data
-clim<-read.csv("input/climate4.csv", header=TRUE, na.strings="<NA>", as.is=TRUE)
+clim<-read.csv("input/climate4.csv", header=TRUE, na.strings="<NA>", as.is=TRUE) #updated it to include raw data for HMK043 and NOT interannual difference
 clim$name_env<-with(clim, paste(species, phenophase, sep="_"))
 clim<-subset(clim, phenophase!="start" & extra!="10" & envunits=="C" & studyid!="HMK028" & studyid!="HMK029" & studyid!="HMK037") #029,037 because nutrients>phenology; 028- because temperature sum
 clim$envvalue<-as.numeric(clim$envvalue)
@@ -28,7 +31,7 @@ sites3<-unique(sites2[,c("studyid","envfactor","envunits","envtype","year","spec
 clim2<-rbind(nosites, sites3) # all years with data
 #merge with spp data so calculating env change only over the years of interaction
 
-#load rawlong.tot from syncmodels.
+
 
 clim3<-merge(clim2, unique(rawlong.tot[,c("studyid","species","year","phenovalue","terrestrial")]), by=c("studyid","species","year"))
 
@@ -51,20 +54,48 @@ clim3<-clim4
 clim3$yr1981 <- clim3$newyear-1981
 
 
+!!!!! Option: Choose 1 species/climate per study
+Bgroups<-unique(clim3$studyid); b<-Bgroups; b<-as.character(b)
+new<-data.frame(array(0,c(nrow(clim3),ncol(clim3))))
+rowcount<-1
+for(i in 1:length(b)){
+int_long<-subset(clim3, studyid==b[i])
+Cgroups<-unique(int_long$species); c<-Cgroups; c<-as.character(c)
+x<-c(1:length(c))
+me<-sample(x, size=1)
+
+spp<-subset(int_long, species==c[me])
+asdf<-rowcount+(nrow(spp)-1)
+
+new[rowcount:asdf,]<-spp
+rowcount<-rowcount+nrow(spp)
+asdf<-rowcount+(nrow(spp)-1)
+}
+names(new)<-names(clim3)
+new<-subset(new, studyid!=0)
+clim3<-new
+
 # STEP 3- Run stan on temp first
 clim3 <- clim3[with(clim3, order(species, year)),]
 clim3 <- na.omit(clim3)
 N<-nrow(clim3)
 y <- clim3$envvalue
 Nspp <- length(unique(clim3$species)) #J
+Nstudy<-length(unique(clim3$studyid))
 species <- as.numeric(as.factor(clim3$species))
+sock<-unique(clim3[,c("studyid","species")])
+studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
-temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+#to calculate temp sensitivity
+#y<- clim3$phenovalue
+#year<- clim3$envvalue
 
-goo <- extract(temp.model)
-asdf<-summary(temp.model)
-print(temp.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
+#temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
+temp.model<-stan("stanmodels/threelevelrandomslope.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+
+
+uni<-unique(clim3[c("studyid","species")])
 
 asdf<-summary(temp.model, pars="b")
 #to get median coefficients from SUMMARY
@@ -76,14 +107,35 @@ d$min<-e$min; d$max<-f$max;
 
 summ_studyspp<-d;  names(summ_studyspp)[1]<-"tempchange"; names(summ_studyspp)[3]<-"temp_min"; names(summ_studyspp)[4]<-"temp_max"
 
-summ_studyspp<-unique(clim3[,c("studyid","species")])
+#dataset length
+clim3$count<-1
+tool<-with(clim3, aggregate(count, by=list(studyid, species), FUN=sum, na.rm=T)) 
+names(tool)[1]<-"studyid"; names(tool)[2]<-"species"; names(tool)[3]<-"length"
 
+d2<-cbind(d, tool)
+m1<-lm(y~length, d2); summary(m1)
+
+#alt
+goo <- extract(temp.model)
+summ_studyspp<-unique(clim3[,c("studyid","species")])
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
     summ_studyspp$model <- goo$b[i,]
-    it1000[,(i-3000)] <- goo$b[i,]
+   it1000[,(i-3000)] <- goo$b[i,]
 }
+tempchange<-it1000
+ndata<-melt(it1000[,2001:3000])
+names(ndata)[1]<-"id"; names(ndata)[2]<-"iteration"; names(ndata)[3]<-"temp.change"; 
+#ndata$intid<-rep(intid.nodups$intid, 1000)
+
+
 summ_studyspp$tempchange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+mean(summ_studyspp$tempchange)
+#computation of the standard error of the mean
+sem<-sd(summ_studyspp$tempchange)/sqrt(length(summ_studyspp$tempchange)); sem
+#95% confidence intervals of the mean
+c(mean(summ_studyspp$tempchange)-2*sem,mean(summ_studyspp$tempchange)+2*sem)
+
 
 # STEP 4- run stan on doy~year
 
@@ -95,6 +147,7 @@ year <- clim3$yr1981
 
 pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
+
 asdf<-summary(pheno.model, pars="b")
 #to get median coefficients from SUMMARY
 median<-asdf[[1]][1:37]; #new<-as.data.frame(y); #number of species =91
@@ -103,10 +156,24 @@ min<-asdf[[1]][112:148]; e<-data.frame(min=unlist(min)) #-1.129 to -1.022
 max<-asdf[[1]][260:296]; f<-data.frame(max=unlist(max)) #-0.3077 to 0.14
 d$min<-e$min; d$max<-f$max;
 
+#dataset length
+clim3$count<-1
+tool<-with(clim3, aggregate(count, by=list(studyid, species), FUN=sum, na.rm=T)) 
+names(tool)[1]<-"studyid"; names(tool)[2]<-"species"; names(tool)[3]<-"length"
+
+d2<-cbind(d, tool)
+m1<-lm(y~length, d2); summary(m1)
+
+
 solo<-d; names(solo)[1]<-"phenochange"; names(solo)[3]<-"pheno_min"; names(solo)[4]<-"pheno_max"
 
 data<-merge(summ_studyspp, solo, by=c("grp"))
+data<-cbind(data, uni)
 
+#non stan approach
+m1<-lme(abs(phenochange)~abs(tempchange), random=~1|studyid, data=data); summary(m1)
+
+#alt
 faa <- extract(pheno.model)
 solo<-unique(clim3[,c("studyid","species")])
 
@@ -116,9 +183,51 @@ for (i in 3000:6000){ # 3000 iterations?
     it1000[,(i-3000)] <- faa$b[i,]
 }
 solo$phenochange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+data<-merge(summ_studyspp, solo[,c("studyid","species","phenochange")],by=c("studyid","species"))
 
-data<-merge(summ_studyspp, solo[,c("studyid","species","phenochange")], by=c("studyid","species"))
 
-*** check T oithonoides, stan not matching paper (stan does equal lm though)
+phenochange<-it1000
+mdata<-melt(it1000[,2001:3000])
+names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"pheno.change"; 
+tdata<-merge(ndata, mdata, by=c("id","iteration"))
 
-ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max,width=.0025), colour="red")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max, height = .1), width=.0025,colour="red")+geom_point(size=2)
+N<-nrow(tdata)
+y <- abs(tdata$pheno.change) #absolute value of pheno change!
+Nspp <- length(unique(tdata$id)) #J
+species <- as.numeric(as.factor(tdata$id))
+year <- abs(tdata$temp.change) #absolute value of temp change
+
+cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+fun<-extract(cov.model)
+sis<-as.data.frame(unique(tdata[,c("id")]))
+
+it1000 <- matrix(0, ncol=3000, nrow=Nspp)
+for (i in 3000:6000){ # 3000 iterations?
+    sis$model <- fun$b[i,]
+    it1000[,(i-3000)] <- fun$b[i,]
+}
+mean(sis$model)
+#computation of the standard error of the mean
+sem<-sd(sis$model)/sqrt(length(sis$model)); sem
+#95% confidence intervals of the mean
+c(mean(sis$model)-2*sem,mean(sis$model)+2*sem)
+
+
+
+*** check T oithonoides, [stan not matching paper (stan does equal lm though)]- CHECKED- DOES MATCH PAPER BECAUSE CHOSE LAST PHENOPHASE OF SEASON (NOT START) AND LAST STAGE HAS GOTTEN LATER- SHOULD FIX FOR FINAL PAPER
+** UPDATE- CHANGED OITHONOIDES SO THAT NOW FIRST PHENOPHASE (DEC 2016)
+
+*** SPP30, 31 ARE OUTLIERS: Pleurobrachia pileus and Pleurobrachia_a pileus from HMK043
+
+ggplot(data, aes(y=abs(phenochange),x=tempchange))+geom_errorbar(aes(ymin=abs(pheno_min), ymax=abs(pheno_max)), colour="red")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max, height = .1), colour="red")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")
+
+OR
+
+ggplot(data, aes(y=abs(phenochange),x=tempchange))+geom_point(size=3)+theme(text = element_text(size=20), axis.text.x=element_text(size=20), axis.title.y=element_text(size=20, angle=90))+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")
+
+yep<-unique(clim3[,c("studyid", "species", "terrestrial")])
+yep2<-merge(data, yep, by=c("studyid","species"))
+
+ggplot(subset(yep2, terrestrial=="terrestrial"), aes(y=abs(phenochange),x=tempchange))+geom_point(size=3)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")
+

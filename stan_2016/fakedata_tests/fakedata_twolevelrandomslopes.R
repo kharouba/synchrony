@@ -3,7 +3,7 @@
 
 rm(list=ls()) 
 library(rstan)
-library(shinyStan)
+library(shinystan)
 set_cppo("fast")  # for best running speed
 
 

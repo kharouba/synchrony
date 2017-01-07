@@ -1,3 +1,6 @@
+DON'T USE!, USE NULLMODEL_SYNC_TIME.R
+
+
 #Aug 2016- Look at workflow from Lizzie- 2016Aug22_nullmodel.pdf
 ## Null model used for synchrony change, to explore effect of length of time series on ability to detect sync change
 

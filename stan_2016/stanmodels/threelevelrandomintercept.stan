@@ -74,6 +74,8 @@ model{
 	//Flat prior for mu
 	
 	//Random effects distribution
+	
+FIX:
 	a_study~normal(a_study, sigma_a_study); //intercept for study (level 3)
 	a_spp~normal(a_spp, sigma_a_spp); //intercept for interaction (level 2)
 	

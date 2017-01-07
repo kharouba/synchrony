@@ -13,6 +13,8 @@ sss2$speciesid<-1:nrow(sss2) #number datas
 
 pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
 
+DOUBLE CHECK THAT PRE_CC IS ONLY YEARS<1981 !!!!!
+
 #Step 2- Create distribution of means and sd (2)
 means <- aggregate(pre_cc["phenovalue"], pre_cc[c("studyid", "species")], FUN=mean)
 names(means)[3]<-"mean_doy" #mean of each dataset
