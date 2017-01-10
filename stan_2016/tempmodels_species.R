@@ -83,8 +83,9 @@ y <- clim3$envvalue
 Nspp <- length(unique(clim3$species)) #J
 Nstudy<-length(unique(clim3$studyid))
 species <- as.numeric(as.factor(clim3$species))
-sock<-unique(clim3[,c("studyid","species")])
-studyid <- as.numeric(as.factor(sock$studyid))
+studyid <- as.numeric(as.factor(clim3$studyid))
+#sock<-unique(clim3[,c("studyid","species")])
+#studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
 #to calculate temp sensitivity
@@ -92,12 +93,12 @@ year <- clim3$yr1981
 #year<- clim3$envvalue
 
 #temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
-temp.model<-stan("stanmodels/threelevelrandomslope.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
 
 
 uni<-unique(clim3[c("studyid","species")])
 
-asdf<-summary(temp.model, pars="b")
+asdf<-summary(temp.model, pars="b_spp")
 #to get median coefficients from SUMMARY
 median<-asdf[[1]][1:37]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
@@ -120,8 +121,8 @@ goo <- extract(temp.model)
 summ_studyspp<-unique(clim3[,c("studyid","species")])
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    summ_studyspp$model <- goo$b[i,]
-   it1000[,(i-3000)] <- goo$b[i,]
+    summ_studyspp$model <- goo$b_spp[i,]
+   it1000[,(i-3000)] <- goo$b_spp[i,]
 }
 tempchange<-it1000
 ndata<-melt(it1000[,2001:3000])
@@ -145,10 +146,11 @@ Nspp <- length(unique(clim3$species)) #J
 species <- as.numeric(as.factor(clim3$species))
 year <- clim3$yr1981
 
-pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+#pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
 
 
-asdf<-summary(pheno.model, pars="b")
+asdf<-summary(pheno.model, pars="b_spp")
 #to get median coefficients from SUMMARY
 median<-asdf[[1]][1:37]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
@@ -179,25 +181,47 @@ solo<-unique(clim3[,c("studyid","species")])
 
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    solo$model <- faa$b[i,]
-    it1000[,(i-3000)] <- faa$b[i,]
+    solo$model <- faa$b_spp[i,]
+    it1000[,(i-3000)] <- faa$b_spp[i,]
 }
 solo$phenochange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+mean(rowMeans(it1000, na.rm=TRUE))
 data<-merge(summ_studyspp, solo[,c("studyid","species","phenochange")],by=c("studyid","species"))
 
 
 phenochange<-it1000
 mdata<-melt(it1000[,2001:3000])
+mdata<-it1000[,2001:2100]
 names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"pheno.change"; 
 tdata<-merge(ndata, mdata, by=c("id","iteration"))
 
-N<-nrow(tdata)
-y <- abs(tdata$pheno.change) #absolute value of pheno change!
-Nspp <- length(unique(tdata$id)) #J
-species <- as.numeric(as.factor(tdata$id))
-year <- abs(tdata$temp.change) #absolute value of temp change
+solo$id<-1:nrow(solo);
+tdata2<-merge(tdata, solo[,c("studyid","species","id")], by=c("id"))
+N<-nrow(tdata2)
+y <- abs(tdata2$pheno.change) #absolute value of pheno change!
+Nspp <- length(unique(tdata2$id)) #J
+species <- as.numeric(as.factor(tdata2$id))
+studyid <- as.numeric(as.factor(tdata2$studyid))
+year <- abs(tdata2$temp.change) #absolute value of temp change
 
-cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+#cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+cov.model<-stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+
+N<-nrow(tdata2)
+y <- abs(tdata2$pheno.change) #absolute value of pheno change!
+J <- length(unique(tdata2$id)) #J
+S <- length(unique(tdata2$studyid))
+plotnum <- as.numeric(as.factor(tdata2$id))
+sock<-unique(tdata2[,c("studyid","species")])
+sitenum <- as.numeric(as.factor(sock$studyid))
+#sitenum <- as.numeric(as.factor(tdata2$studyid))
+x <- abs(tdata2$temp.change) #absolute value of temp change
+
+
+#dat <- list(N=N,S=S,J=J,plotnum=plotnum, sitenum=sitenum,y=y,x=x) 
+fitme <- stan("stanmodels/threelevel_plotsinsites.stan", data=c("N","J","S","plotnum", "sitenum","y","x"), iter=3000, chains=4, control=list(adapt_delta = 0.9, stepsize = 0.5))
+
 
 fun<-extract(cov.model)
 sis<-as.data.frame(unique(tdata[,c("id")]))

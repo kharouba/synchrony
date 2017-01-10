@@ -7,9 +7,13 @@ library(shinystan)
 library(rstanarm)
 
 #Needed to create parameters
-Nspp<- 50 #37 #(Old Nj)
 Nstudy <- 10 #13 # number of studies (old Nk)
 Nsppstudy<- 5 # number of species per study
+Nspp<- 50 #37 #(Old Nj)
+nreps<-10 #number of years per species
+N
+
+
 
 #####################
 # True parameter values
@@ -22,6 +26,8 @@ sigma_b_study<-0.1 #- sd of mean slopes actual=0.737724
 
 a_study<-rnorm(Nstudy, mu_a, sigma_a_study); #generate intercepts for each STUDY
 b_study<-rnorm(Nstudy, mu_b, sigma_b_study); #generate slopes for each STUDY
+
+speciesid <- rep(1:5, 10) 
 
 #THEN make variation in intercepts among species with regards to study
 a_spp <- rep(NA, Nspp)
@@ -60,11 +66,11 @@ studyid<- rep(1:Nstudy, n_spp_per_study) ## Create a vector of study IDs where j
 species <- rep(1:Nspp, n_yrs_per_species) #adds sppid-HK added
 N <- length(species) #nrow of 'dataframe'
 
-uni<-as.data.frame(studyid)
-uni$species<-unique(species)
-uni2<-as.data.frame(species)
-uni3<-merge(uni2, uni, by=c("species"))
-studyid<-uni3$studyid #needs to be same length as number of lowest level/observations
+#uni<-as.data.frame(studyid)
+#uni$species<-unique(species)
+#uni2<-as.data.frame(species)
+#uni3<-merge(uni2, uni, by=c("species"))
+#studyid<-uni3$studyid #needs to be same length as number of lowest level/observations
 
 
 #####################
@@ -85,15 +91,17 @@ y <- rnorm(N, ypred, sigma_y);
 #p<-ncol(desMat)
 
 
-fit_simple<-stan("stanmodels/threelevelrandomslope2.stan", data=c("N","Nspp","Nstudy","species", "studyid","y","year"), iter=3000, chains=4)
+fit_simple<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","species", "studyid","y","year"), iter=3000, chains=4)
 fit_simple<-stan("stanmodels/threelevelrandomeffects3.stan", data=c("N","Nspp","Nstudy","species", "studyid","y","year"), iter=3000, chains=4)
 
 #CHECK WHETHER PROBLEM IS THAT I'M CENTERING RANDOM EFFECTS DISTRIBUTIONS
 
 print(fit_simple)
-print(fit_simple, pars=c("b_yr_0","a_0","b_yr_spp","sigma_y"))
+print(fit_simple, pars=c("mu_b","sigma_b_study","sigma_b","sigma_y"))
 
-simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000)
+
+simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000) #I don't think this is hierarchical
+simple<-stan_lmer(y~year+(0+year|studyid/species), iter=3000)
 simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000, prior_covariance=decov(scale=10))
 simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000, prior_intercept=normal(0, scale=sigma), prior_covariance=decov(scale=10))
 

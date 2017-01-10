@@ -10,7 +10,7 @@
 
 // Three-level (two hierarchical groups) nested random slope model
 // from lday_ind2_indint.stan from Dan Flynn
-// Two-level linear model in Stan
+
 
 data{
 //counters
@@ -34,31 +34,39 @@ data{
 parameters{
 	//Fixed effects
 	//Level 1:
-//	real a_0;  // population/overall intercept (same as beta_0 in classroom ex)
+	real a_0;  // population/overall intercept (same as beta_0 in classroom ex)
 	real b_yr_0;  // overall year effect
 	real<lower=0> sigma_y; 		// measurement error, noise etc. (Level 1) population sd
 
+  real mu_a_0;
+  real mu_b_yr_0;
+  real<lower=0> sigma_a_0; 
+  real<lower=0> sigma_b_yr_0; 
+
 	
 	//LEVEL 3: study level (top level)
-//	real dev_a_study[Nstudy];	// deviation of intercepts across studies
+	real dev_a_study[Nstudy];	// deviation of intercepts across studies
 	real dev_b_yr_study[Nstudy];	//	deviation of slopes across studies
 //	real<lower=0> sigma_a_study; /// sd (variation) of deviation of intercept among studies;
 	real<lower=0> sigma_b_yr_study; /// sd (variation) of deviation of slope among studies; 
 	
 	//LEVEL 2: species level
-//	real dev_a_spp[Nspp]; // deviation of intercepts across species
+	real dev_a_spp[Nspp]; // deviation of intercepts across species
 	real dev_b_yr_spp[Nspp]; //	deviation of slopes across speices 
 //	real<lower=0> sigma_a_spp; // (SD) variation of intercept among species; (sd of random effect)
 	real<lower=0> sigma_b_spp; // (SD) variation of slope among species; (sd of random effect)
-	
-	real a_spp[Nspp]; //intercept for species within studies
+
+// If unpooling intercepts turn these on:
+//	real a_0;  // population/overall intercept (same as beta_0 in classroom ex)
+//	real a_study[Nstudy]; //intercept for species within studies
+//	real a_spp[Nspp]; //intercept for species within studies
 }
 
 
 transformed parameters{
 	//Varying intercepts
-	//real a_study[Nstudy]; //intercept for studies
-	//real a_spp[Nspp]; //intercept for species within studies
+	real a_study[Nstudy]; //intercept for studies
+	real a_spp[Nspp]; //intercept for species within studies
 	
 	//Varying slopes
 	real b_yr_study[Nstudy]; //slope of temperature (or year) at study level (random effect)(Dans b_warm_sp)	
@@ -69,13 +77,13 @@ transformed parameters{
 
 	//Top Level/Level 3/Study level. Random intercepts (a) and slopes
 	for (k in 1:Nstudy){
-	//	a_study[k]=a_0+dev_a_study[k];
+		a_study[k]=a_0+dev_a_study[k];
 		b_yr_study[k]=b_yr_0+dev_b_yr_study[k]; //Random slopes (e.g. temperature change);
 	}
 	
 	//Level 2: spp level. Random intercepts and slopes
 	for (j in 1:Nspp){
-	//	a_spp[j]=a_study[studyid[j]]+dev_a_spp[j];
+		a_spp[j]=a_study[studyid[j]]+dev_a_spp[j];
 		b_yr_spp[j]=b_yr_study[studyid[j]]+dev_b_yr_spp[j]; //Random slopes (e.g. temperature change);
 	}
 	
@@ -86,15 +94,21 @@ transformed parameters{
 }
 
 model{
-	//Prior part of Bayesian inference
-	//Random effects distribution; Distribution of the varying slopes
+//Prior part of Bayesian inference
+//Random effects distribution; Distribution of the varying slopes
 	
+// Below are main effects so they are expected to have non-zero values
+	a_0~normal(mu_a_0, sigma_a_0);
+	b_yr_0~ normal(mu_b_yr_0, sigma_b_yr_0);
+	
+// These (below) are all modeled deviations around main effects and thus must be centered at zero!
 //	dev_a_study~normal(0, sigma_a_study); // to allow pooling of intercepts
 	dev_b_yr_study~normal(0, sigma_b_yr_study); // to allow pooling of slopes # or try b_yr_0
 	
 //	dev_a_spp~normal(0, sigma_a_spp); // to allow pooling of intercepts
 	dev_b_yr_spp~normal(0, sigma_b_spp); // to allow pooling of slopes # or try b_yr_0
 
+// These are sigmas, they are always centered around zero
 //	sigma_a_study~normal(0,10);
 	sigma_b_yr_study~normal(0,10);
 //	sigma_a_spp~normal(0,10);
