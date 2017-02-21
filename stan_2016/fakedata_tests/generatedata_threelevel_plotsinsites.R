@@ -66,11 +66,23 @@ fitme <- stan("stanmodels/threelevel_plotsinsites.stan", data=c("N","J","S","plo
 dat <- list(N=N,S=S,J=J,plotnum=plotnum, sitenum=sitenum,y=y,x=x) 
 fitme <- stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","J","S","plotnum", "sitenum","y","x"), iter=4000, chains=4, control=list(adapt_delta = 0.9, stepsize = 0.5))
 
-mu_a
-mu_b
-sig_a
-sig_b
-sig_y
+#random slopes
+fitme <- stan("stanmodels/threelevel_plotsinsites_unpooledintercepts.stan", data=c("N","J","S","plotnum", "sitenum","y","x"), iter=4000, chains=4, control=list(adapt_delta = 0.9, stepsize = 0.5))
+
+sig_a_study =1.38
+sig_b_study =3.63
+mu_b =4
+sig_b <- 1
+sig_y<-1
+
+
+sig_a <- 2
+sig_b <- 1
+mu_a = 5
+mu_b =4
+sig_a =2
+sig_b =1
+sig_y =1 
 a_plot
 b_plot
 a_site
@@ -79,3 +91,11 @@ sig_a_site
 sig_b_site
 
 launch_shinystan(fitme)
+
+with   a_spp[j] ~ normal(a_study[studyid[j]],sigma_a_study);  added
+
+sig_a_site (fake=1.09, 1.26)
+sig_b_site (fake=0.83, 0.97)
+mu_b (fake=4, 3.41)
+sigma_b (fake=1, 1.44)
+sigma_y (fake=1, 1.01)

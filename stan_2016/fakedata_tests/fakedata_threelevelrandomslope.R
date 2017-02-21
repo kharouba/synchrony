@@ -11,7 +11,7 @@ Nstudy <- 10 #13 # number of studies (old Nk)
 Nsppstudy<- 5 # number of species per study
 Nspp<- 50 #37 #(Old Nj)
 nreps<-10 #number of years per species
-N
+
 
 
 
@@ -101,8 +101,8 @@ print(fit_simple, pars=c("mu_b","sigma_b_study","sigma_b","sigma_y"))
 
 
 simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000) #I don't think this is hierarchical
-simple<-stan_lmer(y~year+(0+year|studyid/species), iter=3000)
-simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000, prior_covariance=decov(scale=10))
+simple<-stan_lmer(y~year+(0+year|studyid/species), iter=3000) #without priors
+simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000, prior_covariance=decov(scale=10)) #only priors for random effects NOT global parameters
 simple<-stan_lmer(y~year+(0+year|studyid)+(0+year|species), iter=3000, prior_intercept=normal(0, scale=sigma), prior_covariance=decov(scale=10))
 
 !!! NOTES

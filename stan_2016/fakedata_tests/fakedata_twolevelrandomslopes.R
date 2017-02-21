@@ -51,6 +51,6 @@ for (j in 1:Nspp){
 
 
 
-fit_simple<-stan("twolevelrandomslope.stan", data=c("N","y","Nspp","species","year"), iter=4000, chains=4)
+fit_simple<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","y","Nspp","species","year"), iter=4000, chains=4)
 
 print(fit_simple, pars=c("mu_b","sigma_b","sigma_y"))

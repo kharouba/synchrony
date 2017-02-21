@@ -1,10 +1,9 @@
+## COVARIATE MODELS 
 # To match individual species doy~year with temp~year
 
 rm(list=ls()) 
-
-library(reshape)
-
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+library(reshape)
 
 #load rawlong.tot from syncmodels.
 
@@ -83,9 +82,9 @@ y <- clim3$envvalue
 Nspp <- length(unique(clim3$species)) #J
 Nstudy<-length(unique(clim3$studyid))
 species <- as.numeric(as.factor(clim3$species))
-studyid <- as.numeric(as.factor(clim3$studyid))
-#sock<-unique(clim3[,c("studyid","species")])
-#studyid <- as.numeric(as.factor(sock$studyid))
+#studyid <- as.numeric(as.factor(clim3$studyid))
+sock<-unique(clim3[,c("studyid","species")])
+studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
 #to calculate temp sensitivity
@@ -93,7 +92,18 @@ year <- clim3$yr1981
 #year<- clim3$envvalue
 
 #temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
-temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+print(temp.model)
+
+#Rhat=1 = convergence
+#adapt_delta is an underlying Stan control 
+#variable for the target acceptance rate (related to Metropolis 
+#acceptance, but quite different)---the main point is that an adapt_delta 
+#closer to one means the algorithm is more careful in simulating the 
+#Hamiltonian (if the simulation is perfect, the acceptance rate is 1)
+
+tempsens.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+print(tempsens.model)
 
 
 uni<-unique(clim3[c("studyid","species")])
@@ -116,7 +126,21 @@ names(tool)[1]<-"studyid"; names(tool)[2]<-"species"; names(tool)[3]<-"length"
 d2<-cbind(d, tool)
 m1<-lm(y~length, d2); summary(m1)
 
-#alt
+##alt
+# for interpretation:
+# for mu_b
+fas<-extract(temp.model)
+it1000 <- matrix(0, ncol=3000, nrow=1)
+for (i in 3000:6000){ # 3000 iterations?
+        it1000[,(i-3000)] <- fas$mu_b[i]
+}
+mean(rowMeans(it1000, na.rm=TRUE))
+sem<-sd(it1000)/sqrt(length(it1000)); sem
+#95% confidence intervals of the mean
+c(mean(it1000)-2*sem,mean(it1000)+2*sem)
+
+
+#for covariate model:
 goo <- extract(temp.model)
 summ_studyspp<-unique(clim3[,c("studyid","species")])
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
@@ -137,6 +161,28 @@ sem<-sd(summ_studyspp$tempchange)/sqrt(length(summ_studyspp$tempchange)); sem
 #95% confidence intervals of the mean
 c(mean(summ_studyspp$tempchange)-2*sem,mean(summ_studyspp$tempchange)+2*sem)
 
+#temp sens figure
+asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
+lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][38:74]
+lab$id<-unique(species)
+
+me<-summary(temp.model, pars=c("a_study"))
+mean(me[[1]][1:13]) #rough guess on mu_a
+
+ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
+
+
+#temp sens figure
+asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
+lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][38:74]
+lab$id<-unique(species)
+
+me<-summary(temp.model, pars=c("a_study"))
+mean(me[[1]][1:13]) #rough guess on mu_a
+
+ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
 
 # STEP 4- run stan on doy~year
 
@@ -147,7 +193,8 @@ species <- as.numeric(as.factor(clim3$species))
 year <- clim3$yr1981
 
 #pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
+pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+print(pheno.model)
 
 
 asdf<-summary(pheno.model, pars="b_spp")
@@ -191,7 +238,7 @@ data<-merge(summ_studyspp, solo[,c("studyid","species","phenochange")],by=c("stu
 
 phenochange<-it1000
 mdata<-melt(it1000[,2001:3000])
-mdata<-it1000[,2001:2100]
+#mdata<-melt(it1000[,2001:2100]) #test
 names(mdata)[1]<-"id"; names(mdata)[2]<-"iteration"; names(mdata)[3]<-"pheno.change"; 
 tdata<-merge(ndata, mdata, by=c("id","iteration"))
 
@@ -201,43 +248,89 @@ N<-nrow(tdata2)
 y <- abs(tdata2$pheno.change) #absolute value of pheno change!
 Nspp <- length(unique(tdata2$id)) #J
 species <- as.numeric(as.factor(tdata2$id))
-studyid <- as.numeric(as.factor(tdata2$studyid))
+#studyid <- as.numeric(as.factor(tdata2$studyid))
 year <- abs(tdata2$temp.change) #absolute value of temp change
-
-
-#cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-cov.model<-stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
-
-N<-nrow(tdata2)
-y <- abs(tdata2$pheno.change) #absolute value of pheno change!
-J <- length(unique(tdata2$id)) #J
-S <- length(unique(tdata2$studyid))
-plotnum <- as.numeric(as.factor(tdata2$id))
+Nstudy <- length(unique(tdata2$studyid)) #J
 sock<-unique(tdata2[,c("studyid","species")])
-sitenum <- as.numeric(as.factor(sock$studyid))
-#sitenum <- as.numeric(as.factor(tdata2$studyid))
-x <- abs(tdata2$temp.change) #absolute value of temp change
+studyid <- as.numeric(as.factor(sock$studyid))
+
+TROUBLESHOOTING-
+1. INCREASE ITERATIONS
+2. TRY HAVING SAME WITHIN-SITE VARIATION
+#cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+cov.model<-stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=9000, chains=4)
+print(cov.model)
+
+What's important for posterior expectations is the effective
+sample size (n_eff in Stan's output), because that's what
+determines the MCMC standard error on the estimate.'
+The simulation with higher effective sample size has a lower standard error of the mean and more stable estimates. 
 
 
-#dat <- list(N=N,S=S,J=J,plotnum=plotnum, sitenum=sitenum,y=y,x=x) 
-fitme <- stan("stanmodels/threelevel_plotsinsites.stan", data=c("N","J","S","plotnum", "sitenum","y","x"), iter=3000, chains=4, control=list(adapt_delta = 0.9, stepsize = 0.5))
-
+#non stan approach
+m1<-lme(abs(pheno.change)~abs(temp.change), random=~1|studyid/species, data=tdata2); summary(m1)
 
 fun<-extract(cov.model)
-sis<-as.data.frame(unique(tdata[,c("id")]))
+sis<-as.data.frame(unique(tdata2[,c("id")]))
 
+# for mu_b
+it1000 <- matrix(0, ncol=3000, nrow=1)
+for (i in 3000:6000){ # 3000 iterations?
+    #sis$model <- fun$mu_b[i]
+    it1000[,(i-3000)] <- fun$mu_b[i]
+}
+mean(rowMeans(it1000, na.rm=TRUE))
+sem<-sd(it1000)/sqrt(length(it1000)); sem
+#95% confidence intervals of the mean
+c(mean(it1000)-2*sem,mean(it1000)+2*sem)
+
+0.058, 0.054-0.062
+
+# for mu_a
+it2000 <- matrix(0, ncol=3000, nrow=1)
+for (i in 3000:6000){ # 3000 iterations?
+    #sis$model <- fun$mu_a[i]
+    it2000[,(i-3000)] <- fun$mu_a[i]
+}
+mean(rowMeans(it2000, na.rm=TRUE))
+
+
+#Figure-Relationship between temperature change and phenological change show 95%CI around (slope) estimates of phenological and temperature (i.e. b_spp), black line is fit with mu_a and mu_b
+#load data from above
+ggplot(data, aes(y=abs(phenochange),x=abs(tempchange)))+geom_errorbar(aes(ymin=abs(pheno_min), ymax=abs(pheno_max)), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max, height = .1), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=0.058, intercept=0.71, size=1.5)
+
+#for display
+study <- aggregate(tdata2["pheno.change"], tdata2["studyid"], FUN=mean); names(study)[2]<-"pheno"
+study2 <- aggregate(tdata2["temp.change"], tdata2["studyid"], FUN=mean); names(study2)[2]<-"temp"
+studs<-merge(study,study2, by=c("studyid"))
+#by study
+asdf<-summary(cov.model, pars=c("a_study","b_study"))
+lab<-as.data.frame(asdf[[1]][1:13]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][14:26]
+lab$id<-unique(tdata2$studyid)
+ggplot(subset(tdata2, iteration==1), aes(y=abs(pheno.change),x=abs(temp.change), colour=factor(studyid)))+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=0.07, intercept=0.71, size=2)
+
++geom_abline(intercept=mean(rowMeans(it2000, na.rm=TRUE)), slope=mean(rowMeans(it1000, na.rm=TRUE)), colour="red")
+
+#one study
+ggplot(subset(tdata2, iteration==1 & studyid=="HMK038"), aes(y=abs(pheno.change),x=abs(temp.change), colour=factor(studyid)))+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab("Temperature change (C/yr)")+geom_smooth(method="lm", se=FALSE)+geom_abline(slope=0.11, intercept=0.687)
+
+#for b_spp
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    sis$model <- fun$b[i,]
-    it1000[,(i-3000)] <- fun$b[i,]
+    sis$model <- fun$b_spp[i,]
+    it1000[,(i-3000)] <- fun$b_spp[i,]
 }
-mean(sis$model)
+slopes<-melt(it1000[,2001:3000]) #for figure
+names(slopes)[1]<-"id"; names(slopes)[2]<-"iteration"; names(slopes)[3]<-"slope"; #for figure
+
+sis$pheno.temp <- rowMeans(it1000, na.rm=TRUE); mean(rowMeans(it1000, na.rm=TRUE)) #mean across iterations for EACH SPP
 #computation of the standard error of the mean
-sem<-sd(sis$model)/sqrt(length(sis$model)); sem
+sem<-sd(sis$pheno.temp)/sqrt(length(sis$pheno.temp)); sem
 #95% confidence intervals of the mean
-c(mean(sis$model)-2*sem,mean(sis$model)+2*sem)
+c(mean(sis$pheno.temp)-2*sem,mean(sis$pheno.temp)+2*sem)
 
-
+new_y<-extract(cov.model, pars="ypred")
 
 *** check T oithonoides, [stan not matching paper (stan does equal lm though)]- CHECKED- DOES MATCH PAPER BECAUSE CHOSE LAST PHENOPHASE OF SEASON (NOT START) AND LAST STAGE HAS GOTTEN LATER- SHOULD FIX FOR FINAL PAPER
 ** UPDATE- CHANGED OITHONOIDES SO THAT NOW FIRST PHENOPHASE (DEC 2016)

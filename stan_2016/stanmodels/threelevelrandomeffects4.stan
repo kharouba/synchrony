@@ -9,7 +9,7 @@
 //_1=slope
 
 // Three-level (two hierarchical groups) nested random intercept AND slope model
-// From Megan & Lizzie in Hawaii, started Jan 6 2017
+// From Megan & Lizzie in Hawaii, started Jan 6 2017 (threelvel_plotsinsites.stan)
 // 
 
 data{
@@ -20,7 +20,7 @@ data{
 	
 //Group ids
 	int<lower=1> species[N];			//spp identity
-	int<lower=1> studyid[N]; 	//vector of unique studyids for each species	
+	int<lower=1> studyid[Nspp]; 	//vector of unique studyids for each species	
 	
 // predictors
 	vector[N] year; 	//year of data point
@@ -36,8 +36,10 @@ parameters{
 	vector[Nspp] a_spp;    //estimated intercept for each site
 	vector[Nspp] b_spp;    //estimated slope for each site
 
-  	real<lower=0> sigma_a_study[Nstudy];  //variance in intercept across plots;
-	real<lower=0> sigma_b_study[Nstudy];  //variance in slopes across plots; 
+  	real<lower=0> sigma_a_study;  //variance in intercept across plots;
+	real<lower=0> sigma_b_study;  //variance in slopes across plots; 
+	//real<lower=0> sigma_a_study[Nstudy];  //variance in intercept across plots;
+	//real<lower=0> sigma_b_study[Nstudy];  //variance in slopes across plots; 
       // the slope for plot j in site s is drawn from a distribution with mean b_study[s] 
       // and standard deviation sig_b_site[s]
   
@@ -59,20 +61,22 @@ model{
     ypred[i] = a_spp[species[i]] + b_spp[species[i]]*year[i];
   	}
 
-  //For estimating a single value for all within-site variances
+  //For estimating separate within-site variances
   for (j in 1:Nspp){    
-   	a_spp[j] ~ normal(a_study[studyid[j]], sigma_a_study[studyid[j]]);
-  	b_spp[j] ~ normal(b_study[studyid[j]],sigma_b_study);
+   	a_spp[j] ~ normal(a_study[studyid[j]], sigma_a_study);
+  	b_spp[j] ~ normal(b_study[studyid[j]], sigma_b_study);
+  	//a_spp[j] ~ normal(a_study[studyid[j]], sigma_a_study[studyid[j]]);
+  	//b_spp[j] ~ normal(b_study[studyid[j]], sigma_b_study[studyid[j]]);
   }
   
   a_study ~ normal(mu_a,sigma_a);
   b_study ~ normal(mu_b,sigma_b);
   
-  sigma_a_study~normal(0, 10);
-  sigma_a~normal(0,10);
+  sigma_a_study~normal(0, 5);
+  sigma_a~normal(0,5);
 
-  sigma_b_study~normal(0, 10);
-  sigma_b~normal(0,10);
+  sigma_b_study~normal(0, 5);
+  sigma_b~normal(0,5);
 	
 //Likelihood part of Bayesian inference
 		y~normal(ypred, sigma_y); //data is distributed normally around predicted (yhat) with s.d. sig_y (this is error of data around predicted values)

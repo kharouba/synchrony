@@ -39,6 +39,6 @@ for (i in 1:N){
 model{
 	//Random effects distribution	
 	b~normal(mu_b, sigma_b); #not drawing from normal distribution, it is calculating the join t distribution function (in log space); it is evaluating the normal prpopability distribution function of b given 0 and sigma
-	
+//	sigma_b~normal(0,2);
 	y~normal(ypred, sigma_y);
 }	

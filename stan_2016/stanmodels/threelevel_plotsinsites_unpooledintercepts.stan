@@ -29,12 +29,12 @@ parameters {
   vector[S] a_site;    //estimated intercept for each site
   vector[S] b_site;    //estimated slope for each site
   
-//  real<lower=0> sig_a_site;  //variance in intercept across plots; 
+  real<lower=0> sig_a_site;  //variance in intercept across plots; 
 #  real<lower=0> sig_a_site[S];  //variance in intercept across plots; 
       // the intercept for plot j in site s is drawn from a distribution with mean a_site[s]
       // and standard deviation sig_a_site[s]
   real<lower=0> sig_b_site;  //variance in slopes across plots; 
-#  real<lower=0> sig_b_site[S];  //variance in slopes across plots; 
+// real<lower=0> sig_b_site[S];  //variance in slopes across plots; 
       // the slope for plot j in site s is drawn from a distribution with mean b_site[s] 
       /// and standard deviation sig_b_site[s]
 //  real mu_a;                    //mean intercept across sites; 
@@ -61,13 +61,18 @@ model {
 
   //For estimating a single value for all within-site variacnes
   for (j in 1:J){
-//  a_plot[j] ~ normal(a_site[sitenum[j]], sig_a_site);
+	a_plot[j] ~ normal(a_site[sitenum[j]], sig_a_site);
     b_plot[j] ~ normal(b_site[sitenum[j]], sig_b_site);
   }
   
     
 //  a_site ~ normal(mu_a,sig_a);
   b_site ~ normal(mu_b,sig_b);
+  
+  sig_a_site ~ normal(0, 5); 
+//  sig_a ~ normal(0, 5); 
+  sig_b_site ~ normal(0, 5); 
+  sig_b ~ normal(0, 5); 
   
   y ~ normal(yhat,sig_y);        //data is distributed normally around predicted (yhat) with s.d. sig_y (this is error of data around predicted values)
   

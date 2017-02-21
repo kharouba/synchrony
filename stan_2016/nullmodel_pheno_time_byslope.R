@@ -1,5 +1,5 @@
 #Dec 2016- Look at workflow from Lizzie- 2016Nov18_nullmodel.pdf
-## Null model used for synchrony change, to explore effect of length of time series on ability to detect sync change
+## Null model used for PHENOLOGICAL change, to explore effect of length of time series on ability to detect PHENO change
 # Calculates slopes first
 
 st.err <- function(x) {sd(x)/sqrt(length(x))}
@@ -30,7 +30,7 @@ year <- pre_cc$year
 #16 interactions from pre_cc
 #31 species from pre_cc (31 spp all together, 2 spp repeat across intxns)
 
-null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 faa <- extract(null.model)
 solo<-unique(pre_cc[,c("studyid","species")])
 
@@ -40,7 +40,7 @@ for (i in 3000:6000){ # 3000 iterations?
     it1000[,(i-3000)] <- faa$b[i,]
 }
 solo$phenochange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EAC
-
+mean(rowMeans(it1000, na.rm=TRUE)) #mean across iterations for EAC
 #mean phenochange=-0.26
 
 # Step 3- Simulate data for all speices and re-run stan
@@ -81,7 +81,7 @@ Nspp <- length(unique(new$species))
 species <- as.numeric(as.factor(new$species))
 year <- new$year_null
 
-new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
 
 
 asdf<-summary(new.model, pars="b")

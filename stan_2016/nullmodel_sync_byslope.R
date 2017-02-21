@@ -30,8 +30,20 @@ year <- pre_cc$year
 #16 interactions from pre_cc
 #32 species from pre_cc (32 spp all together, 2 spp repeat across intxns)
 
-null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=12000, chains=4)
+print(null.model)
 goo <- extract(null.model)
+
+#
+fas<-extract(null.model)
+it1000 <- matrix(0, ncol=3000, nrow=1)
+for (i in 3000:6000){ # 3000 iterations?
+        it1000[,(i-3000)] <- fas$mu_b[i]
+}
+mean(rowMeans(it1000, na.rm=TRUE))
+sem<-sd(it1000)/sqrt(length(it1000)); sem
+#95% confidence intervals of the mean
+c(mean(it1000)-2*sem,mean(it1000)+2*sem)
 
 #individaul species
 summ_studyspp <- unique(pre_cc[,c("studyid", "species")]);
@@ -408,7 +420,7 @@ species <- as.numeric(as.factor(total2$species))
 year <- total2$year_null
 
 # new stan
-new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 
 gooey <- extract(new.model)
 summ_studyspp  <- unique(total[c("intid","species")])
@@ -435,11 +447,27 @@ for (i in 3000:6000){ # 2000 iterations?
     names(andtheanswer2)[4]<-"model.y"
     it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer2$model.y #model.x=spp1
 }
-mos<-mean(rowMeans(it1000, na.rm=TRUE))
+mos<-mean(rowMeans(it1000, na.rm=TRUE)); null<-rowMeans(it1000, na.rm=TRUE)
 
 sem<-sd(rowMeans(it1000, na.rm=TRUE))/sqrt(length(rowMeans(it1000, na.rm=TRUE))); sem
 #95% confidence intervals of the mean
 c(mean(rowMeans(it1000, na.rm=TRUE))-2*sem,mean(rowMeans(it1000, na.rm=TRUE))+2*sem)
+
+
+#MAGNITUDE
+hist(abs(rowMeans(it1000, na.rm=TRUE)))
+median(abs(rowMeans(it1000, na.rm=TRUE)))
+
+sem<-sd(abs(rowMeans(it1000, na.rm=TRUE)))/sqrt(length(abs(rowMeans(it1000, na.rm=TRUE)))); sem
+#95% confidence intervals of the mean
+c(mean(abs(rowMeans(it1000, na.rm=TRUE)))-2*sem,mean(abs(rowMeans(it1000, na.rm=TRUE)))+2*sem)
+
+#FIGURE 
+tog$null<-null[1:54]
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+ggplot(tog, aes(x=null))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+xlim(-1.5, 1.4)+annotation_custom(text_high, xmin=1.0, xmax=1.0, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+
 
 
 #old
