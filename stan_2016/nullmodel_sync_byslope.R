@@ -251,7 +251,8 @@ new<-na.omit(new)
 new<-subset(new, year_null!=0)
 
 # Next with 22 interactions where at least ONE partner is found in other intxns (n=32 species (there are 21 species whose partner is repeating but not it e.g. Sitta europaea, there are 11 species that repeat e.g. Accipiter nisus))
-#there are 5 interactions where both partner is repeating e.g. Parus2 caeruleus, Accipiter nisus
+# use intid.nodups to look at interaction structure
+#there are 5 interactions where both partner is repeating e.g. Parus2 caeruleus, Accipiter nisus, see next look below
 # for each repeat, same time series, FIX AFTER
 ### LOOP WILL HAVE ERROR BUT OK, PROCEED!!! (Error in (1 + (newnonrepeatspp[1] - nonrepeatspp[1])):21 : NA/NaN argument)
 newer<-data.frame(array(0,c(nrow(rawlong.tot2),4)))

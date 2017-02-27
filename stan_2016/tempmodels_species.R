@@ -92,7 +92,9 @@ year <- clim3$yr1981
 #year<- clim3$envvalue
 
 #temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
-temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+#temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+#Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as grouping
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 print(temp.model)
 
 #Rhat=1 = convergence
@@ -193,7 +195,9 @@ species <- as.numeric(as.factor(clim3$species))
 year <- clim3$yr1981
 
 #pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+#pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+#Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as group
+pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 print(pheno.model)
 
 
@@ -259,6 +263,9 @@ TROUBLESHOOTING-
 2. TRY HAVING SAME WITHIN-SITE VARIATION
 #cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 cov.model<-stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=9000, chains=4)
+# Feb 2017 decisions: (1) Not enough variation within species or studies therefore do not pool slopes; (2) Not enough repeating species ACROSS studies to justify including study as grouping, therefore two level random intercept model.
+
+
 print(cov.model)
 
 What's important for posterior expectations is the effective

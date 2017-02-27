@@ -69,11 +69,11 @@ rawlong.nodups <- rawlong.nodups[with(rawlong.nodups, order(species, year)),]
 
 #number of years per species
     
-##
 
+*** CHOOSE HINGE MODEL *** 
 ## Hinge models
 
-##
+## 1981
 # Heather's code to add in data formatted for hinge model
 hinge <- subset(rawlong.nodups, intid=="170" | intid=="171" | intid=="177" |
     intid=="178" | intid=="179" | intid=="180" |intid=="181" | intid=="189" |
@@ -91,23 +91,85 @@ hinge_post<-subset(hinge, year>1981); hinge_post$newyear<-hinge_post$year
 hinges<-rbind(hinge_pre, hinge_post)
 rawlong.tot<-rbind(hinge_non, hinges)
 
+#1976
+# 3 groups of species: those with enough data <1976, those with some data but not enough <1976, and those with no data <1976
+pre<-subset(rawlong.tot, year<=1976)
+pre$count<-1
+sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
+sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
+sss2$speciesid<-1:nrow(sss2) #number datas
+
+hinge<-merge(rawlong.tot, sss2, by=c("studyid", "species"))
+hinge_pre<-subset(hinge, year<=1976); hinge_pre$newyear_76<-1976
+hinge_post<-subset(hinge, year>1976); hinge_post$newyear_76<-hinge_post$year
+hinges<-rbind(hinge_pre, hinge_post)
+
+hinge_non<-subset(sss, count<5) #datasets with NOT enough data pre climate change (n=21)
+hinge_non$speciesid<-1:nrow(hinge_non) #number datas
+hinge_non2<-merge(rawlong.tot, hinge_non, by=c("studyid", "species"))
+hinge_non2$newyear_76<-hinge_non2$year
+sums<-rbind(hinges, hinge_non2)
+#names(sums)[6]<-"count"
+
+letstry<-anti_join(rawlong.tot, sums)
+letstry$newyear_76<-letstry$year
+
+letstry2<-rbind(letstry,sums[,c("X","studyid","intid","repeatcode_study","figcode_study","int_type","spp","year","species","general","repeatcode","figcode","phenofreq","short_site","terrestrial","phenovalue","newyear","yr1981","newyear_76")])
+rawlong.tot<-letstry2
+
+
+
 
 # prep the data to fit the model including:
 # aggregate to get species level characteristics
 # subset down to the phenovalues
 # Run stan on unique species (n=88)
 # (old) Run stan on 108 unique intid-species interactions (n=108) (NOT unique species (n=91))
+
+#NO HINGE
+rawlong.tot <- arrange(rawlong.tot, species)
+rawlong.tot$yr1981 <- rawlong.tot$year-1981
+rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
+N <- nrow(rawlong.tot2)
+y <- rawlong.tot2$phenovalue
+Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
+Nstudy<-length(unique(rawlong.tot2$studyid))
+species <- as.numeric(as.factor(rawlong.tot2$species))
+sock<-unique(rawlong.tot2[,c("studyid","species")])
+studyid <- as.numeric(as.factor(sock$studyid))
+year <- rawlong.tot2$yr1981
+
+
+#1981
 rawlong.tot <- arrange(rawlong.tot, species)
 rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
 rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
-#rawlong.tot$newid<-with(rawlong, paste(intid,"_",species)); 
-#rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
 rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981","year")]) #CLEAN UP so only unique values across repeating species within studoes
 N <- nrow(rawlong.tot2)
 y <- rawlong.tot2$phenovalue
 Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
+Nstudy<-length(unique(rawlong.tot2$studyid))
 species <- as.numeric(as.factor(rawlong.tot2$species))
+sock<-unique(rawlong.tot2[,c("studyid","species")])
+studyid <- as.numeric(as.factor(sock$studyid))
 year <- rawlong.tot2$yr1981
+
+
+#1976
+rawlong.tot <- arrange(rawlong.tot, species)
+rawlong.tot$yr1976 <- rawlong.tot$newyear-1976
+rawlong.tot <- rawlong.tot[with(rawlong.tot, order(species)),]
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1976","year")]) #CLEAN UP so only unique values across repeating species within studoes
+N <- nrow(rawlong.tot2)
+y <- rawlong.tot2$phenovalue
+Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
+Nstudy<-length(unique(rawlong.tot2$studyid))
+species <- as.numeric(as.factor(rawlong.tot2$species))
+sock<-unique(rawlong.tot2[,c("studyid","species")])
+studyid <- as.numeric(as.factor(sock$studyid))
+year <- rawlong.tot2$yr1976
+
 
 #Just on pre_cc data 
 rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
@@ -124,14 +186,18 @@ rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")])
 N <- nrow(rawlong.tot2)
 y <- rawlong.tot2$phenovalue
 Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
-species <- as.numeric(as.factor(rawlong.tot2$species))
-year <- rawlong.tot2$yr1981
+
 
 
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+
+#New model as of Jan 2017
+#sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
+
+print(sync.model)
 
 #Match up interacting species and look at differences
 
