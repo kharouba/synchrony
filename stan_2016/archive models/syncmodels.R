@@ -30,7 +30,7 @@ source("input/datacleaning.R")
 # in the data file: spp1 = neg= negative species e.g. resource 
 
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
-
+<<<<<<< HEAD
 #new changes to data (Oct 2016): No longer unique: Caterpillar 2a, 2b, 2c, 2d; Daphnia 3a, 3b; Paurs 2a, 2b caeruleus; Pyg. antarcticus a and b; Caterpillar4 now 4a and 4b
 rawlong<-subset(rawlong, species!="asdf1" & species!="asdf2")
 #asdf1= Diatom2b, asdf2= Thermocyclops oithonoides but first stage, in analysis now, last phenophase
@@ -161,10 +161,10 @@ species <- as.numeric(as.factor(rawlong.tot2$species))
 sock<-unique(rawlong.tot2[,c("studyid","species")])
 studyid <- as.numeric(as.factor(sock$studyid))
 year <- rawlong.tot2$yr1981
-
+=======
 source("input/datacleaningmore.R")
 
-
+>>>>>>> origin/master
 
 
 #1976
@@ -203,16 +203,16 @@ Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
-
+<<<<<<< HEAD
 sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 
 #New model as of Jan 2017
 #sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
 
 print(sync.model)
-
+=======
 sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-
+>>>>>>> origin/master
 
 #Match up interacting species and look at differences
 

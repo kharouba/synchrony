@@ -7,7 +7,7 @@
 # So I made some adjustments here and in syncmodels.R first! ##
 
 # Set working directory: 
-if(length(grep("Lizzie", getwd())>0)) {setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016") 
+if(length(grep("Lizzie", getwd())>0)) {    setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016") 
 } else 
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 
