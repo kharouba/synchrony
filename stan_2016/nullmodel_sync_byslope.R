@@ -5,18 +5,24 @@
 ## Some notes and updates by Lizzie on 27 Feb 2017 ##
 ## Note: This code seems to jump in with raw.long.tot already started ... #
 # So I made some adjustments here and in syncmodels.R first! ##
-# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
+
+# Set working directory: 
+if(length(grep("Lizzie", getwd())>0)) {    setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016") 
+} else 
+setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 
 rm(list=ls()) 
 options(stringsAsFactors = FALSE)
 
-## added by Lizzie
+## added by Lizzie: libraries and data!
+library(rstan)
+library(dplyr)
+
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
 source("input/datacleaningmore.R")
 
-
 #Step 1- create pre_climate change dataset
-#load rawlong.tot
+#load rawlong.tot ... how?!
 rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
 
 rawlong.tot2$count<-1
@@ -41,8 +47,15 @@ year <- pre_cc$year
 #16 interactions from pre_cc
 #32 species from pre_cc (32 spp all together, 2 spp repeat across intxns)
 
-null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+null.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=6000, chains=4)
 goo <- extract(null.model)
+
+print(null.model, pars = c("mu_b", "sigma_y", "a", "b"))
+# some very low n_eff, but then there is not much data (see below) *but* the intercept values seem really crazy ... in the thousands; may want to add a prior? 
+dim(pre_cc)
+dim(rawlong.tot2)
+length(unique(pre_cc$studyid))
+length(unique(rawlong.tot2$studyid))
 
 #individaul species
 summ_studyspp <- unique(pre_cc[,c("studyid", "species")]);

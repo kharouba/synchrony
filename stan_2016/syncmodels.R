@@ -6,8 +6,13 @@
 rm(list=ls()) 
 options(stringsAsFactors = FALSE)
 
+
+# Set working directory: 
+if(length(grep("Lizzie", getwd())>0)) {    setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016") 
+} else 
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
-# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
+
+# libraries
 library(ggplot2)
 library(rstan)
 library(shinystan)
@@ -50,7 +55,7 @@ year <- rawlong.tot2$yr1981
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
-sync.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 #Match up interacting species and look at differences
 
