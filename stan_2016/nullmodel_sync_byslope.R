@@ -1,8 +1,19 @@
 #Nov 2016- Look at workflow from Lizzie- 2016Nov18_nullmodel.pdf
 ## Null model used for synchrony change
 
+
+## Some notes and updates by Lizzie on 27 Feb 2017 ##
+## Note: This code seems to jump in with raw.long.tot already started ... #
+# So I made some adjustments here and in syncmodels.R first! ##
+# setwd("~/Documents/git/projects/trophsynch/synchrony/stan_2016")
+
 rm(list=ls()) 
 options(stringsAsFactors = FALSE)
+
+## added by Lizzie
+rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
+source("input/datacleaningmore.R")
+
 
 #Step 1- create pre_climate change dataset
 #load rawlong.tot
