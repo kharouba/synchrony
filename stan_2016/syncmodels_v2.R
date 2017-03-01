@@ -33,24 +33,6 @@ rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
 source("input/datacleaningmore.R")
 
 
-#Just on pre_cc data 
-rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
-rawlong.tot2$count<-1
-pre<-subset(rawlong.tot2, year<=1981)
-sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
-sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
-sss2$speciesid<-1:nrow(sss2) #number datas
-pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
-pre_cc<-subset(pre_cc, year<=1981)
-rawlong.tot<-pre_cc
-rawlong.tot <- arrange(rawlong.tot, species)
-rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
-N <- nrow(rawlong.tot2)
-y <- rawlong.tot2$phenovalue
-Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
-
-
-
 #New model as of June 2016
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
@@ -305,6 +287,24 @@ multiplot(a,b, cols=2)
 ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=abs(meanchange), shape=factor(spp)))+theme_bw()+theme()+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_colour_continuous(name="abs(synchrony change)")+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=10), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)
 #geom_label_repel()
 #+geom_text(hjust=3)
+
+#Extra
+#Just on pre_cc data 
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","year","yr1981")]) 
+rawlong.tot2$count<-1
+pre<-subset(rawlong.tot2, year<=1981)
+sss<- aggregate(pre["count"], pre[c("studyid", "species")], FUN=sum)
+sss2<-subset(sss, count>=5) #datasets with enough data pre climate change
+sss2$speciesid<-1:nrow(sss2) #number datas
+pre_cc<-merge(rawlong.tot2, sss2, by=c("studyid", "species"))
+pre_cc<-subset(pre_cc, year<=1981)
+rawlong.tot<-pre_cc
+rawlong.tot <- arrange(rawlong.tot, species)
+rawlong.tot2<-unique(rawlong.tot[,c("studyid","species","phenovalue","yr1981")]) #CLEAN UP so only unique values across repeating species within studoes
+N <- nrow(rawlong.tot2)
+y <- rawlong.tot2$phenovalue
+Nspp <- length(unique(rawlong.tot2$species)) #newid is character !
+
 
 
 #Appendix
