@@ -1,4 +1,4 @@
-as### Started 1 April 2015 ###
+### Started 1 April 2015 ###
 ### April Fool's Day! ###
 
 ## Run STAN with synchrony data ##
