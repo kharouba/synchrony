@@ -144,7 +144,7 @@ sub$meanchange<--sub$meanchange
 sub2<-subset(tog, intid!="1" & intid!="175" & intid!="235")
 tog<-rbind(sub, sub2); nrow(tog) #### FINAL SYNCHRONY DATASET
 
-#KEY RESULT:
+#### KEY RESULT:
 #Direction and magnitude
 mean(tog$meanchange, na.rm=TRUE) #mean difference across interactions; they drift apart by half a day a decade
 !number decreasing: 
@@ -174,7 +174,9 @@ sem<-with(sub, sd(abs(meanchange))/sqrt(length(abs(meanchange)))); sem
 #95% confidence intervals of the mean
 with(sub, c(mean(meanchange)-2*sem,mean(meanchange)+2*sem))
 
-#Covariates
+
+############################
+####Covariates
 rawlong.tot$count<-1
 startdate<-aggregate(rawlong.tot["year"], rawlong.tot[c("studyid", "intid")], FUN=min); names(startdate)[3]<-"minyear"
 ts_length<-aggregate(rawlong.tot["count"], rawlong.tot[c("studyid", "intid","spp")], FUN=sum); names(ts_length)[4]<-"length"
