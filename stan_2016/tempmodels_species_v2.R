@@ -1,11 +1,27 @@
+### UPDATES FROM FEB 2017 WHEN CHANGES MADE TO MODEL TYPE 
 ## COVARIATE MODELS 
 # To match individual species doy~year with temp~year
 
 rm(list=ls()) 
 setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
+
+# libraries
+library(ggplot2)
+library(rstan)
+library(shinystan)
+library(grid)
+library(nlme)
+library(dplyr)
+library(ggrepel)
 library(reshape)
+set_cppo("fast")  # for best running speed
+source("/users/kharouba/google drive/UBC/multiplot.R")
 
 #load rawlong.tot from syncmodels.
+#get data
+rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
+# use for 1981 hinge model
+source("input/datacleaningmore.R")
 
 #step 1- sync climate and pheno data
 clim<-read.csv("input/climate4.csv", header=TRUE, na.strings="<NA>", as.is=TRUE) #updated it to include raw data for HMK043 and NOT interannual difference
@@ -87,25 +103,17 @@ sock<-unique(clim3[,c("studyid","species")])
 studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
-#to calculate temp sensitivity
-#y<- clim3$phenovalue
-#year<- clim3$envvalue
-
-#temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
-#temp.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
 #Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as grouping
 temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
-print(temp.model)
+print(temp.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
-#Rhat=1 = convergence
-#adapt_delta is an underlying Stan control 
-#variable for the target acceptance rate (related to Metropolis 
-#acceptance, but quite different)---the main point is that an adapt_delta 
-#closer to one means the algorithm is more careful in simulating the 
-#Hamiltonian (if the simulation is perfect, the acceptance rate is 1)
+#to calculate temp sensitivity
+y<- clim3$phenovalue
+year<- clim3$envvalue
 
-tempsens.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=4000, chains=4)
-print(tempsens.model)
+#Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as grouping
+tempsens.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(tempsens.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
 uni<-unique(clim3[c("studyid","species")])
@@ -147,8 +155,8 @@ goo <- extract(temp.model)
 summ_studyspp<-unique(clim3[,c("studyid","species")])
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    summ_studyspp$model <- goo$b_spp[i,]
-   it1000[,(i-3000)] <- goo$b_spp[i,]
+    summ_studyspp$model <- goo$b[i,]
+   it1000[,(i-3000)] <- goo$b[i,]
 }
 tempchange<-it1000
 ndata<-melt(it1000[,2001:3000])
@@ -194,11 +202,9 @@ Nspp <- length(unique(clim3$species)) #J
 species <- as.numeric(as.factor(clim3$species))
 year <- clim3$yr1981
 
-#pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-#pheno.model<-stan("stanmodels/threelevelrandomslope3.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=8000, chains=4)
 #Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as group
 pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
-print(pheno.model)
+print(pheno.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
 asdf<-summary(pheno.model, pars="b_spp")
@@ -232,8 +238,8 @@ solo<-unique(clim3[,c("studyid","species")])
 
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    solo$model <- faa$b_spp[i,]
-    it1000[,(i-3000)] <- faa$b_spp[i,]
+    solo$model <- faa$b[i,]
+    it1000[,(i-3000)] <- faa$b[i,]
 }
 solo$phenochange <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
 mean(rowMeans(it1000, na.rm=TRUE))
@@ -254,16 +260,10 @@ Nspp <- length(unique(tdata2$id)) #J
 species <- as.numeric(as.factor(tdata2$id))
 #studyid <- as.numeric(as.factor(tdata2$studyid))
 year <- abs(tdata2$temp.change) #absolute value of temp change
-Nstudy <- length(unique(tdata2$studyid)) #J
-sock<-unique(tdata2[,c("studyid","species")])
-studyid <- as.numeric(as.factor(sock$studyid))
 
-TROUBLESHOOTING-
-1. INCREASE ITERATIONS
-2. TRY HAVING SAME WITHIN-SITE VARIATION
-#cov.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
-cov.model<-stan("stanmodels/threelevelrandomeffects4.stan", data=c("N","Nspp","Nstudy","y","species","studyid","year"), iter=9000, chains=4)
 # Feb 2017 decisions: (1) Not enough variation within species or studies therefore do not pool slopes; (2) Not enough repeating species ACROSS studies to justify including study as grouping, therefore two level random intercept model.
+cov.model<-stan("stanmodels/twolevelintercept2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(pheno.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
 print(cov.model)

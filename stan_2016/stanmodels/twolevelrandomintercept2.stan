@@ -16,14 +16,13 @@ data{
 parameters{	
 	// hyperparameters
 	real mu_a;				//mean intercept across species (population)
-	//real mu_b;				//mean slope across species (population)
+	
 	real<lower=0> sigma_y; 	//measurement error, noise etc. (population standard deviation)
 	
 	real a[Nspp]; 		//the intercept for each species
 	real b[Nspp]; 		//the slope for each species 
 	real<lower=0> sigma_a;	//variation of intercept among species; [sd of random effects]
-	//real<lower=0> sigma_b;	//variation of slope among species; [sd of random effects]
-
+	
 }
 
 transformed parameters{
