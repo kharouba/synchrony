@@ -1,0 +1,134 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[top=1.00in, bottom=1.0in, left=1in, right=1in]{geometry}
+\usepackage{amsmath}
+
+\begin{document}
+
+\noindent For the model \verb|twolevelrandomslope2.stan|, which has one hierachical level for species, represented here by $j$, each observation is $i$, and partial pooling on the slopes ($\beta$) only:
+
+\begin{equation}
+y_{i}=\alpha_{j[i]}+\beta_{j[i]}X_{i}+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\beta \sim N(\mu_{\beta}, \sigma_{\beta})
+\end{equation}
+
+Which is the same as this:
+
+\begin{equation}
+y_{i}=\alpha_{sp[i]}+\beta_{sp[i]}X_{i}+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\beta_{sp} \sim N(\mu_{\beta}, \sigma_{\beta})
+\end{equation}
+
+Or this:
+
+\begin{equation}
+y_{i}=a_{j[i]}+b_{j[i]}X_{i}+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+b \sim N(\mu_{b}, \sigma_{b})
+\end{equation}
+
+Or this:
+
+\begin{equation}
+y_{i}=\alpha_{j[i]}+\beta_{j[i]}(Year_{i}-1981)+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\beta \sim N(\mu_{\beta}, \sigma_{\beta})
+\end{equation}
+
+Or this:
+
+\begin{equation}
+y_{i}=\beta_{0,j[i]}+\beta_{1,j[i]}(Year_{i}-1981)+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\beta_{1} \sim N(\mu_{\beta}, \sigma_{\beta})
+\end{equation}
+
+\vspace{3ex}
+My personal favorite of all possible combinations:
+
+\begin{equation}
+y_{i}=\alpha_{sp[i]}+\beta_{sp[i]}(Year_{i}-1981)+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\beta_{sp} \sim N(\mu_{\beta}, \sigma_{\beta})
+\end{equation}
+
+\vspace{2ex}
+
+\noindent Note that I did not write out the priors on $\mu_{\beta}$ and $\sigma_{\beta}$, which are not specified and thus are uniform. I think you could just say in the text that we used the default priors. Also note that I think you could leave the $_{\beta}$ off $\mu$ and $\sigma$ if you really wanted, but perhaps nice for clarity?
+
+\newpage
+
+\noindent For the model \verb|threelevelrandomslope3.stan|, which has one hierachical level for species,nested within study, indexed, and partial pooling on the slopes ($\beta$) and intercepts ($\alpha$) by study, but only pooling on species for the slopes (I think):
+
+\begin{equation}
+y_{i}=\alpha_{study[sp[i]]}+\beta_{study[sp[i]]}X_{i}+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\alpha_{study} \sim N(\mu_{\alpha[sp]}, \sigma_{\alpha[sp]})
+\end{equation}
+
+
+\begin{equation}
+\beta_{study} \sim N(\mu_{\beta[sp]}, \sigma_{\beta[sp]})
+\end{equation}
+
+
+\begin{equation}
+\mu_{\beta} \sim N(\mu_{\beta 2}, \sigma_{\beta 2})
+\end{equation}
+
+\begin{equation}
+\sigma_{\alpha} \sim N(0,5)
+\end{equation}
+
+\begin{equation}
+\sigma_{\beta} \sim N(0,5)
+\end{equation}
+
+
+\begin{equation}
+\sigma_{\beta 2}\sim N(0,5)
+\end{equation}
+
+\begin{equation}
+\mu_{\beta 2}\sim \text{ ...no prior specified}
+\end{equation}
+
+\vspace{2ex}
+\noindent Again, many variants of this possible (see above). For example, you could do species, indexed here by $j$, nested within study, indexed by $k$ and get:
+
+\begin{equation}
+y_{i}=\alpha_{k[j[i]]}+\beta_{k[j[i]]}X_{i}+\epsilon_{i}
+\end{equation}
+
+\begin{equation}
+\alpha_{k} \sim N(\mu_{\alpha[j]}, \sigma_{\alpha[j]})
+\end{equation}
+
+
+\begin{equation}
+\beta_{k} \sim N(\mu_{\beta[j]}, \sigma_{\beta[j]})...
+\end{equation}
+
+\vspace{2ex}
+
+\noindent See also: 12.5 in Gelman \& Hill, pages 262-265.
+
+\end{document}
+
+\begin{equation}
+\end{equation}

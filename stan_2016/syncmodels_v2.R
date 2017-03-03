@@ -22,7 +22,7 @@ library(nlme)
 library(dplyr)
 library(ggrepel)
 set_cppo("fast")  # for best running speed
-source("/users/kharouba/google drive/UBC/multiplot.R")
+source("..//multiplot.R")
 #library(reshape)
 # library(lme4)
 
