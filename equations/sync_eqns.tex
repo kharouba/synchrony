@@ -6,12 +6,14 @@
 
 \noindent For the model \verb|twolevelrandomslope2.stan|, which has one hierachical level for species, represented here by $j$, each observation is $i$, and partial pooling on the slopes ($\beta$) only:
 
+% no commas
+
 \begin{equation}
 y_{i}=\alpha_{j[i]}+\beta_{j[i]}X_{i}+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\beta \sim N(\mu_{\beta}, \sigma_{\beta})
+\beta_{j} \sim N(\mu_{\beta}, \sigma_{\beta})
 \end{equation}
 
 Which is the same as this:
@@ -31,7 +33,7 @@ y_{i}=a_{j[i]}+b_{j[i]}X_{i}+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-b \sim N(\mu_{b}, \sigma_{b})
+b_{j} \sim N(\mu_{b}, \sigma_{b})
 \end{equation}
 
 Or this:
@@ -41,17 +43,17 @@ y_{i}=\alpha_{j[i]}+\beta_{j[i]}(Year_{i}-1981)+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\beta \sim N(\mu_{\beta}, \sigma_{\beta})
+\beta_{j} \sim N(\mu_{\beta}, \sigma_{\beta})
 \end{equation}
 
 Or this:
 
 \begin{equation}
-y_{i}=\beta_{0,j[i]}+\beta_{1,j[i]}(Year_{i}-1981)+\epsilon_{i}
+y_{i}=\beta_{0j[i]}+\beta_{1j[i]}(Year_{i}-1981)+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\beta_{1} \sim N(\mu_{\beta}, \sigma_{\beta})
+\beta_{1j} \sim N(\mu_{\beta}, \sigma_{\beta})
 \end{equation}
 
 \vspace{3ex}
@@ -67,28 +69,28 @@ y_{i}=\alpha_{sp[i]}+\beta_{sp[i]}(Year_{i}-1981)+\epsilon_{i}
 
 \vspace{2ex}
 
-\noindent Note that I did not write out the priors on $\mu_{\beta}$ and $\sigma_{\beta}$, which are not specified and thus are uniform. I think you could just say in the text that we used the default priors. Also note that I think you could leave the $_{\beta}$ off $\mu$ and $\sigma$ if you really wanted, but perhaps nice for clarity?
+\noindent Note that I did not write out the priors on $\mu_{\beta}$ and $\sigma_{\beta}$ and the $\alpha_{j}$, which are not specified and thus are uniform. I think you could just say in the text that we used the default priors. Also note that I think you could leave the $_{\beta}$ off $\mu$ and $\sigma$ if you really wanted, but perhaps nice for clarity?
 
 \newpage
 
-\noindent For the model \verb|threelevelrandomslope3.stan|, which has one hierachical level for species,nested within study, indexed, and partial pooling on the slopes ($\beta$) and intercepts ($\alpha$) by study, but only pooling on species for the slopes (I think):
+\noindent For the model \verb|threelevelrandomslope3.stan|, which has a hierachical level for species, nested within (another hierarchical level) study, and partial pooling on the slopes ($\beta$) and intercepts ($\alpha$) by species, but only pooling on study for the slopes; also, note that all species share a common $\sigma$ (for intercepts, $\sigma_{\alpha}$, and slopes, $\sigma_{\beta_{1}}$):
 
 \begin{equation}
 y_{i}=\alpha_{study[sp[i]]}+\beta_{study[sp[i]]}X_{i}+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\alpha_{study} \sim N(\mu_{\alpha[sp]}, \sigma_{\alpha[sp]})
+\alpha_{study[sp]} \sim N(\alpha_{study}, \sigma_{\alpha})
 \end{equation}
 
 
 \begin{equation}
-\beta_{study} \sim N(\mu_{\beta[sp]}, \sigma_{\beta[sp]})
+\beta_{study[sp]} \sim N(\beta_{study}, \sigma_{\beta_{1}})
 \end{equation}
 
 
 \begin{equation}
-\mu_{\beta} \sim N(\mu_{\beta 2}, \sigma_{\beta 2})
+\beta_{study} \sim N(\mu_{\beta}, \sigma_{\beta_{2}})
 \end{equation}
 
 \begin{equation}
@@ -96,16 +98,16 @@ y_{i}=\alpha_{study[sp[i]]}+\beta_{study[sp[i]]}X_{i}+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\sigma_{\beta} \sim N(0,5)
+\sigma_{\beta_{1}} \sim N(0,5)
 \end{equation}
 
 
 \begin{equation}
-\sigma_{\beta 2}\sim N(0,5)
+\sigma_{\beta_{2}}\sim N(0,5)
 \end{equation}
 
 \begin{equation}
-\mu_{\beta 2}\sim \text{ ...no prior specified}
+\mu_{\beta}\sim \text{ ...no prior specified}
 \end{equation}
 
 \vspace{2ex}
@@ -116,12 +118,16 @@ y_{i}=\alpha_{k[j[i]]}+\beta_{k[j[i]]}X_{i}+\epsilon_{i}
 \end{equation}
 
 \begin{equation}
-\alpha_{k} \sim N(\mu_{\alpha[j]}, \sigma_{\alpha[j]})
+\alpha_{k[j]} \sim N(\alpha_{k}, \sigma_{\alpha})
 \end{equation}
 
 
 \begin{equation}
-\beta_{k} \sim N(\mu_{\beta[j]}, \sigma_{\beta[j]})...
+\beta_{k[j]} \sim N(\beta_{k}, \sigma_{\beta_{1}})...
+\end{equation}
+
+\begin{equation}
+\beta_{k} \sim N(\mu_{\beta}, \sigma_{\beta_{2}})...
 \end{equation}
 
 \vspace{2ex}
