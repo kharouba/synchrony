@@ -65,11 +65,11 @@ model{
   //a_spp[j] ~ normal(a_study[studyid[j]],sigma_a_study[studyid[j]]);  
   //b_spp[j] ~ normal(b_study[studyid[j]],sigma_b_study[studyid[j]]);
   
-  a_spp[j] ~ normal(a_study[studyid[j]],sigma_a_study);  
-  b_spp[j] ~ normal(b_study[studyid[j]],sigma_b_study);
+  a_spp[j] ~ normal(a_study[studyid[j]],sigma_a_study);   
+  b_spp[j] ~ normal(b_study[studyid[j]],sigma_b_study); // sigma_b1
   }
   
-  b_study ~ normal(mu_b,sigma_b);
+  b_study ~ normal(mu_b,sigma_b); // sigma_b2
   sigma_a_study~normal(0, 5);
   sigma_b_study~normal(0, 5);
   sigma_b~normal(0,5);
