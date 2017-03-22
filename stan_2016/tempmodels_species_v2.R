@@ -104,8 +104,13 @@ studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
 #Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as grouping
-temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=10000, chains=4)
 print(temp.model, pars = c("mu_b", "sigma_y", "a", "b"))
+#temp.model<-stan("stanmodels/twolevelrandomeffects2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+#print(temp.model, pars = c("mu_a","mu_b", "sigma_y", "a", "b"))
+
+asdf<-summary(temp.model)
+hist(asdf[[1]][1:37], main="Intercepts from temp change stan model")
 
 #to calculate temp sensitivity
 y<- clim3$phenovalue
@@ -118,7 +123,7 @@ print(tempsens.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 uni<-unique(clim3[c("studyid","species")])
 
-asdf<-summary(temp.model, pars="b_spp")
+asdf<-summary(temp.model, pars="b")
 #to get median coefficients from SUMMARY
 median<-asdf[[1]][1:37]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
@@ -207,7 +212,7 @@ pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y",
 print(pheno.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
-asdf<-summary(pheno.model, pars="b_spp")
+asdf<-summary(pheno.model, pars="b")
 #to get median coefficients from SUMMARY
 median<-asdf[[1]][1:37]; #new<-as.data.frame(y); #number of species =91
 d<-data.frame(y=unlist(median), grp=1:length(median)) 
@@ -232,7 +237,7 @@ data<-cbind(data, uni)
 #non stan approach
 m1<-lme(abs(phenochange)~abs(tempchange), random=~1|studyid, data=data); summary(m1)
 
-#alt
+#alt; for covariate model
 faa <- extract(pheno.model)
 solo<-unique(clim3[,c("studyid","species")])
 
@@ -261,9 +266,27 @@ species <- as.numeric(as.factor(tdata2$id))
 #studyid <- as.numeric(as.factor(tdata2$studyid))
 year <- abs(tdata2$temp.change) #absolute value of temp change
 
+#without outlier:
+Pleurobrachia_a pileus (30)
+Pleurobrachia pileus (1976-2003) (31)
+solo$id<-1:nrow(solo);
+tdata3<-subset(tdata2, id!=30 & id!=31)
+N<-nrow(tdata3)
+y <- abs(tdata3$pheno.change) #absolute value of pheno change!
+Nspp <- length(unique(tdata3$id)) #J
+species <- as.numeric(as.factor(tdata3$id))
+#studyid <- as.numeric(as.factor(tdata2$studyid))
+year <- abs(tdata3$temp.change) #absolute value of temp change
+
+
+
 # Feb 2017 decisions: (1) Not enough variation within species or studies therefore do not pool slopes; (2) Not enough repeating species ACROSS studies to justify including study as grouping, therefore two level random intercept model.
-cov.model<-stan("stanmodels/twolevelintercept2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
-print(pheno.model, pars = c("mu_b", "sigma_y", "a", "b"))
+cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+
+# March 2017 decision- not enough variation within species to assign each species its own slope (i.e. no varying slopes) 
+cov.model<-stan("stanmodels/twolevelrandomintercept_woslopes.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(cov.model, pars = c("mu_a", "mu_b","sigma_y", "a"))
 
 
 print(cov.model)
@@ -280,18 +303,18 @@ m1<-lme(abs(pheno.change)~abs(temp.change), random=~1|studyid/species, data=tdat
 fun<-extract(cov.model)
 sis<-as.data.frame(unique(tdata2[,c("id")]))
 
-# for mu_b
+#  b (no mu_b because random intercept model)
 it1000 <- matrix(0, ncol=3000, nrow=1)
 for (i in 3000:6000){ # 3000 iterations?
     #sis$model <- fun$mu_b[i]
-    it1000[,(i-3000)] <- fun$mu_b[i]
+    it1000[,(i-3000)] <- fun$b[i]
 }
-mean(rowMeans(it1000, na.rm=TRUE))
+rowMeans(it1000, na.rm=TRUE)
 sem<-sd(it1000)/sqrt(length(it1000)); sem
 #95% confidence intervals of the mean
 c(mean(it1000)-2*sem,mean(it1000)+2*sem)
-
-0.058, 0.054-0.062
+-0.041, -0.065, -0.0177
+#0.058, 0.054-0.062
 
 # for mu_a
 it2000 <- matrix(0, ncol=3000, nrow=1)
@@ -304,7 +327,8 @@ mean(rowMeans(it2000, na.rm=TRUE))
 
 #Figure-Relationship between temperature change and phenological change show 95%CI around (slope) estimates of phenological and temperature (i.e. b_spp), black line is fit with mu_a and mu_b
 #load data from above
-ggplot(data, aes(y=abs(phenochange),x=abs(tempchange)))+geom_errorbar(aes(ymin=abs(pheno_min), ymax=abs(pheno_max)), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max, height = .1), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=0.058, intercept=0.71, size=1.5)
+ggplot(data, aes(y=abs(phenochange),x=abs(tempchange)))+geom_errorbar(aes(ymin=abs(pheno_min), ymax=abs(pheno_max)), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=-0.41, intercept=0.71, size=1.5)
+#geom_ribbon(aes(ymin=-0.065, ymax=-0.0177), alpha=0.2)
 
 #for display
 study <- aggregate(tdata2["pheno.change"], tdata2["studyid"], FUN=mean); names(study)[2]<-"pheno"

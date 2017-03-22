@@ -15,6 +15,7 @@ Phytoplankton1 spp. (66); a=98.18 (92.91,103.39); b-0.52 (-0.83, -0.20)
 
 #2nd example
 sub<-subset(rawlong.tot, intid==171)
+sub$year2<-with(sub, year-1981)
 #1981 hinge:
 Daphnia3 spp. (spp 29); a=138.07 (132.90, 143.24); b=-0.80 (-1.20,-0.39)
 Perca fluviatillis (64); a=139.71 (134.49, 144.86) b=-0.55 (-0.96,-0.15)
@@ -22,11 +23,17 @@ Perca fluviatillis (64); a=139.71 (134.49, 144.86) b=-0.55 (-0.96,-0.15)
 Daphnia3 spp. (spp 29); a=135.43 (); b= -0.66 ()
 Perca fluviatillis (64); a=137.90 () b=-0.64 ()
 
-a<-ggplot(sub, aes(y=phenovalue,x=yr1981))+geom_point(aes(colour=factor(species)))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab("Year")+scale_size_continuous(guide=FALSE)+geom_abline(aes(slope=-0.80, intercept=138.07, linetype='hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.66, intercept=135.43,linetype='no hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.55, intercept=139.71,linetype='hinge'),colour='#00BFC4')+geom_abline(aes(slope=-0.64, intercept=137.90,linetype='no hinge'), colour='#00BFC4')+scale_linetype_manual(values=c('solid','dashed'))+xlim(-12,27)+geom_line(aes(colour=factor(species)))+geom_vline(xintercept=0, linetype="dotted")
+TRY GEOM_LINE
+WITH GEOM_RIBBON(aes(ymin=, ymax=), alpha=0.2)
+
+
+a<-ggplot(sub, aes(y=phenovalue,x=year2, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab("")+scale_size_continuous(guide=FALSE)+geom_line(aes(colour=factor(species)))+geom_segment(aes(x=-12, xend=0, y=138.07+0, yend=138.07+0*0, linetype='hinge'),colour='#F8766D')+geom_segment(aes(x=0, xend=27, y=139.07+-(0.80), yend=138.07+(-0.80*27), linetype='hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.66, intercept=135.43,linetype='no hinge'),colour='#F8766D')+geom_segment(aes(x=-12, xend=0, y=139.6+0, yend=139.6+0*0, linetype='hinge'),colour='#00BFC4')+geom_segment(aes(x=0, xend=27, y=139.71+(-0.55), yend=139.71+(-0.55*27), linetype='hinge'),colour='#00BFC4')+geom_abline(aes(slope=-0.64, intercept=137.90,linetype='no hinge'), colour='#00BFC4') +scale_linetype_manual(values=c('solid','dashed'))+xlim(-20,27)+geom_vline(xintercept=0, linetype="dotted")
 # to check colours: ggplot_build(a)$data
+#geom_ribbon(aes(ymin=, ymax=), alpha=0.2)
 
 #3rd example
 sub2<-subset(rawlong.tot, intid==180)
+sub2$year2<-with(sub2, year-1981)
 #1981 hinge:
 Operophtera brumata (52) a=160.21, b=-0.61
 Parus2 major (58) a=122.93 b=-0.43
@@ -35,11 +42,17 @@ Operophtera brumata (52): a=156.04; b=-0.35
 Parus2 major (58): a=119.92; b=-0.24
 
 #hinge
-b<-ggplot(sub2, aes(y=phenovalue,x=yr1981))+geom_point(aes(colour=factor(species)))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+xlab("Year")+scale_size_continuous(guide=FALSE)+geom_abline(aes(slope=-0.61, intercept=160.21, linetype='hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.35, intercept=156.04,linetype='no hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.43, intercept=122.93,linetype='hinge'),colour='#00BFC4')+geom_abline(aes(slope=-0.24, intercept=119.92,linetype='no hinge'),colour='#00BFC4')+scale_linetype_manual(values=c('solid','dashed'))+xlim(-20,25)+geom_line(aes(colour=factor(species)))+geom_vline(xintercept=0, linetype="dotted")+theme(legend.position="none")
+b<-ggplot(sub2, aes(y=phenovalue,x=year2))+geom_point(aes(colour=factor(species)))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+xlab("Year")+geom_line(aes(colour=factor(species)))+scale_size_continuous(guide=FALSE)+geom_segment(aes(x=-20, xend=0, y=160.21+0, yend=160.21+0*0, linetype='hinge'),colour='#F8766D')+geom_segment(aes(x=0, xend=25, y=160.21+(-0.61), yend=160.21+(-0.61*25), linetype='hinge'),colour='#F8766D')+geom_abline(aes(slope=-0.35, intercept=156.04,linetype='no hinge'),colour='#F8766D')+geom_segment(aes(x=-20, xend=0, y=122.93+0, yend=122.93+0*0, linetype='hinge'),colour='#00BFC4')+geom_segment(aes(x=0, xend=25, y=122.93+(-0.43), yend=122.93+(-0.43*25), linetype='hinge'),colour='#00BFC4')+geom_abline(aes(slope=-0.24, intercept=119.92,linetype='no hinge'),colour='#00BFC4')+scale_linetype_manual(values=c('solid','dashed'))+xlim(-20,27)+geom_vline(xintercept=0, linetype="dotted")+theme(legend.position="none")
 
-multiplot(a,b,cols=2)
+multiplot(a,b,cols=1)
 
-
+# MAP  #
+library(rworldmap)
+newmap<-getMap(resolution="coarse")
+dad<-read.csv("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/input/studies_geog.csv", header=TRUE, na.strings="NA", as.is=TRUE)
+coordinates(dad)<-c("x","y")
+plot(newmap)
+plot(dad, add=T, pch=20, col="red")
 
 
 #Repeating species

@@ -22,7 +22,7 @@ library(nlme)
 library(dplyr)
 library(ggrepel)
 set_cppo("fast")  # for best running speed
-source("..//multiplot.R")
+source("/users/kharouba/google drive/UBC/multiplot.R")
 #library(reshape)
 # library(lme4)
 
@@ -208,6 +208,7 @@ mean(lol$beta)
 
 m1<-lm(abs(meanchange)~length, data=tog2); summary(m1)
 with(tog2, plot(abs(meanchange)~length)); 
+ggplot(tog2, aes(x=length, y=abs(meanchange)))+geom_point(size=2)+theme_bw()
 
 # multiple factor model
 N <- nrow(tog2)

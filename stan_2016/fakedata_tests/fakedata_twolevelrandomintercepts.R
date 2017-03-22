@@ -1,3 +1,5 @@
+** note from March 17 2017: slopes need to be varying!! CODE IS WRONG RIGHT NOW
+
 For two level RANDOM Intercepts MODEL- matches twolevelrandomsintercepts.stan
 N.B true mu_b out of bounds- value is higher than range
 
