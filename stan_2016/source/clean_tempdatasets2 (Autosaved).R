@@ -48,8 +48,8 @@ clim3$yr1981 <- clim3$newyear-1981
 ### to get absolute value of temperature change (i.e. based on unique datasets) ###
 #Stan model
 #HMK011- 2 unique
-#HMK019- 3 ( WAS 2 unique) 
-#HMK038 - 2 uniqu3
+#HMK019- 2 unique) 
+#HMK038 - 2 unique
 #HMK051- 4 (was 3)
 #HMK023-  1 unique; HMK031-1; HMK034- 1, HMK043=1; #HMK016 - 1 #HMK018 - 1; #HMK052- 1; #HMk036- 1; #HMK042-1
 

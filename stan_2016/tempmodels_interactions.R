@@ -31,20 +31,35 @@ ddply(dataset, c("datasetid"), summarise,
 
 dataset <- dataset[with(dataset, order(species, year)),]
 N<-nrow(dataset)
+Nspp <- length(unique(dataset$species)) 
 y <- dataset$envvalue
-specieschar.hin<- aggregate(dataset["envvalue"], dataset[c("species")], FUN=length)
-specieschar.hin <- specieschar.hin[with(specieschar.hin, order(species)),]
-Nspp <- nrow(specieschar.hin) #J
 species <- as.numeric(as.factor(dataset$species))
 year <- dataset$yr1981
 
-temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(temp.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 summ_studyspp <- subset(dataset, select=c("studyid","species", "datasetid")); 
 summ_studyspp <- unique(summ_studyspp)
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 
 goo <- extract(temp.model) 
+summ_studyspp<-unique(dataset[,c("studyid","species")])
+it1000 <- matrix(0, ncol=3000, nrow=Nspp)
+for (i in 3000:6000){ # 3000 iterations?
+    summ_studyspp$model <- goo$b[i,]
+   it1000[,(i-3000)] <- goo$b[i,]
+}
+tempchange<-it1000
+ndata<-melt(it1000[,2001:3000])
+names(ndata)[1]<-"id"; names(ndata)[2]<-"iteration"; names(ndata)[3]<-"temp.change"; 
+#ndata$intid<-rep(intid.nodups$intid, 1000)
+
+
+## Run sync models
+
+
+
 
 specieschar.formodel <- aggregate(dataset["envvalue"], dataset[c("studyid","species",
     "datasetid")], FUN=length)
@@ -53,8 +68,14 @@ ddply(dataset, c("studyid", "species", "datasetid"), summarise,
     nspp=n_distinct(year))
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species", "datasetid"))
 
+
+
+
+
 # Step 1 in the merge: Get the intid
-rawlong <- read.csv("/input/rawlong2.csv", header=TRUE)
+rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
+# use for 1981 hinge model
+source("input/datacleaningmore.R")
 sol<-merge(specieschar.formodel.sm, unique(rawlong[,c("studyid","intid")]),
    by=c("studyid"), all.x=TRUE)
 #sol<- sol[with(sol,order(species)),]
@@ -83,8 +104,8 @@ plot(data.stanfit~model.mean, data=compare.samemodel)
 abline(0,1)
 
 # Now we need to get the averages since some species 
-temp.change <- matrix(0, ncol=1000, nrow=22) # 1000 iterations for 22 interactions;
-allspecieswcoef <- matrix(0, ncol=1000, nrow=22)
+temp.change <- matrix(0, ncol=1000, nrow=18) # 1000 iterations for 22 interactions;
+allspecieswcoef <- matrix(0, ncol=1000, nrow=18)
 for (i in 2000:3000){ # 2000 iterations?
     summ_studyspp$model.est <- goo$b[i,]
     # step 1: Get back the missing species

@@ -260,11 +260,11 @@ tdata<-merge(ndata, mdata, by=c("id","iteration"))
 solo$id<-1:nrow(solo);
 tdata2<-merge(tdata, solo[,c("studyid","species","id")], by=c("id"))
 N<-nrow(tdata2)
-y <- abs(tdata2$pheno.change) #absolute value of pheno change!
+y <- tdata2$pheno.change #absolute value of pheno change!
 Nspp <- length(unique(tdata2$id)) #J
 species <- as.numeric(as.factor(tdata2$id))
 #studyid <- as.numeric(as.factor(tdata2$studyid))
-year <- abs(tdata2$temp.change) #absolute value of temp change
+year <- tdata2$temp.change #absolute value of temp change
 
 #without outlier:
 Pleurobrachia_a pileus (30)
@@ -281,7 +281,6 @@ year <- abs(tdata3$temp.change) #absolute value of temp change
 
 
 # Feb 2017 decisions: (1) Not enough variation within species or studies therefore do not pool slopes; (2) Not enough repeating species ACROSS studies to justify including study as grouping, therefore two level random intercept model.
-cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 # March 2017 decision- not enough variation within species to assign each species its own slope (i.e. no varying slopes) 
@@ -327,7 +326,7 @@ mean(rowMeans(it2000, na.rm=TRUE))
 
 #Figure-Relationship between temperature change and phenological change show 95%CI around (slope) estimates of phenological and temperature (i.e. b_spp), black line is fit with mu_a and mu_b
 #load data from above
-ggplot(data, aes(y=abs(phenochange),x=abs(tempchange)))+geom_errorbar(aes(ymin=abs(pheno_min), ymax=abs(pheno_max)), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=-0.41, intercept=0.71, size=1.5)
+ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=0.28, intercept=-0.08, size=1.5)
 #geom_ribbon(aes(ymin=-0.065, ymax=-0.0177), alpha=0.2)
 
 #for display
