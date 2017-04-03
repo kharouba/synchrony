@@ -48,9 +48,9 @@ clim3$yr1981 <- clim3$newyear-1981
 ### to get absolute value of temperature change (i.e. based on unique datasets) ###
 #Stan model
 #HMK011- 2 unique
-#HMK019- 3 ( WAS 2 unique) 
-#HMK038 - 2 uniqu3
-#HMK051- 4 (was 3)
+#HMK019- 2 unique) 
+#HMK038 - 2 unique
+#HMK051- 3 (cat4a and b the same)
 #HMK023-  1 unique; HMK031-1; HMK034- 1, HMK043=1; #HMK016 - 1 #HMK018 - 1; #HMK052- 1; #HMk036- 1; #HMK042-1
 
 clim3 <- clim3[with(clim3, order(studyid, year)),]
@@ -117,7 +117,7 @@ lookuptable <- c("Corydalis ambigua"="HMK023 _ 10", "Diatom2b spp."="HMK031 _ 11
     "Clamator glandarius"="HMK052 _ 16", "Diatom3 spp."="HMK036 _ 17",
     "Acrocephalus scirpaceus"="HMK042 _ 18", "Daphnia3 spp."="HMK019 _ 4",
      "Ficedula2 albicollis"="HMK038 _ 6", 
-    "Parus caeruleus"="HMK038 _ 6", "Parus3 major"="HMK038 _ 6")
+    "Parus caeruleus"="HMK038 _ 6", "Parus3 major"="HMK038 _ 6", "Caterpillar4b spp."="HMK051 _ 7")
 
 #"Pygoscelis_a antarcticus"="HMK018 _ 15",
 #"Daphnia3a spp."="HMK019 _ 4",
@@ -126,10 +126,14 @@ lookuptable <- c("Corydalis ambigua"="HMK023 _ 10", "Diatom2b spp."="HMK031 _ 11
 mergemein <- data.frame(species=row.names(as.data.frame(lookuptable)),
     datasetid.more=as.data.frame(lookuptable)$lookuptable)
 
-datasetid.trans <- merge(datasetid.trans, mergemein, by=c("species"),
-     all.y=TRUE, all.x=TRUE)
+datasetid.trans2 <- merge(datasetid.trans, mergemein, by=c("species"),all.y=TRUE, all.x=TRUE)
 
-datasetid.trans$datasetid[is.na(datasetid.trans$datasetid)==TRUE] <-
-    datasetid.trans$datasetid.more[is.na(datasetid.trans$datasetid)==TRUE]
+#datasetid.trans2$datasetid[is.na(datasetid.trans2$datasetid.more)==TRUE] <-    datasetid.trans2$datasetid.more[is.na(datasetid.trans2$datasetid)==TRUE]
+
+datasetid.trans2$datasetid<-as.factor(datasetid.trans2$datasetid)    
+datasetid.trans2<-datasetid.trans2[order(datasetid.trans2$datasetid),]
+datasetid.trans2[19:37,"datasetid"]<-datasetid.trans2[19:37,"datasetid.more"]
 
 datasetid.trans$datasetid.more <- NULL
+
+

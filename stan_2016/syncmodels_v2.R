@@ -37,9 +37,20 @@ source("input/datacleaningmore.R")
 #Random slopes only, no random intercepts, hinge, no covariate matrix:
 #sync.model<-stan("synchrony1_notype_randslops_wcovar.stan", data=c("N","Nspp","y","species","year"), iter=2000, warmup=1000, thin=10, chains=4)
 
-sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 print(sync.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
+
+#For pheno change
+fh.sim <- extract(sync.model)# 
+it1000 <- matrix(0, ncol=3000, nrow=1) #2000 iterations for 53 interactions;
+for (i in 3000:6000){ # 2000 iterations?
+    it1000[,(i-3000)] <- fh.sim$mu_b[i]
+}
+mean(rowMeans(it1000, na.rm=TRUE))
+sem<-sd(it1000)/sqrt(length(it1000)); sem
+#95% confidence intervals of the mean
+c(mean(it1000)-2*sem,mean(it1000)+2*sem)
 
 #Match up interacting species and look at differences
 
@@ -88,13 +99,6 @@ for (i in 3000:6000){ # 2000 iterations?
 }
 synch.model<-it1000
 
-#it1000 <- matrix(0, ncol=3000, nrow=Nspp) #2000 iterations for 53 interactions;
-#for (i in 3000:6000){ # 2000 iterations?
- #   summ_studyspp$model <- fh.sim$b[i,]
-  #  it1000[,(i-3000)] <- summ_studyspp$model
-#}
-#synch.model<-it1000
-#dr$stan<-rowMeans(it1000, na.rm=TRUE)
 
 
 
@@ -198,7 +202,7 @@ x<-tog2$length
 x<-tog2$phenofreq
 x<-ifelse(tog2$phenofreq == "daily", 1, ifelse(tog2$phenofreq == "weekly", 2, 3))
 #x1<-tog2$length
-y<-abs(tog2$meanchange)
+y<-tog2$meanchange
 N<-nrow(tog2)
 
 stan.lm<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/simplelinearmodel.stan", data=c("N","x","y"), iter=2000, chains=4)
@@ -206,8 +210,10 @@ print(stan.lm)
 lol<-extract(stan.lm)
 mean(lol$beta)
 
-m1<-lm(abs(meanchange)~length, data=tog2); summary(m1)
+m1<-lm(meanchange~minyear, data=tog2); summary(m1)
 with(tog2, plot(abs(meanchange)~length)); 
+
+ggplot(tog2, aes(x=minyear, y=meanchange))+geom_point()+geom_abline(slope=0.01, intercept=-23.27)
 
 # multiple factor model
 N <- nrow(tog2)
@@ -244,7 +250,11 @@ print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
 library(grid)
 text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
 text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
-a<-ggplot(tog, aes(x=meanchange))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.052, linetype="solid",size=1)+geom_vline(xintercept=0.0053, linetype=2,size=1)+annotation_custom(text_high, xmin=1.2, xmax=1.2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+null<-read.csv("nullmodel_sync.csv", header=TRUE, na.strings="NA", as.is=TRUE) #values for null model are from here
+tog$meanperdec<-with(tog, meanchange*10)
+a<-ggplot(tog, aes(x=meanchange*10))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.052, linetype="solid",size=1)+geom_vline(xintercept=0.0073, linetype=2,size=0.05)+geom_vline(xintercept=-0.0084, linetype=2,size=0.05)+geom_vline(xintercept=-0.0058, linetype=2,size=0.05)+geom_vline(xintercept=0.0094, linetype=2,size=0.05)+geom_vline(xintercept=0.0023, linetype=2,size=0.05)+annotation_custom(text_high, xmin=1.2, xmax=1.2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+
+
 
 #Magnitude
 ggplot(tog, aes(x=abs(meanchange)))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0.44, linetype="solid",size=1)+geom_vline(xintercept=0.042, linetype=2,size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
@@ -258,12 +268,13 @@ ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alp
 
 #Link to individual species
 tog2<-tog[,c(1:6,9:10)]
+summ_studyspp2<-summ_studyspp[,1:2]
 it1000 <- matrix(0, ncol=3000, nrow=Nspp)
 for (i in 3000:6000){ # 3000 iterations?
-    summ_studyspp$model <- fh.sim$b[i,]
-    it1000[,(i-3000)] <- summ_studyspp$model
+    summ_studyspp2$model <- fh.sim$b[i,]
+    it1000[,(i-3000)] <- summ_studyspp2$model
 }
-summ_studyspp$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
+summ_studyspp2$stanfit <- rowMeans(it1000, na.rm=TRUE) #mean across iterations for EACH SPP
 #mean(summ_studyspp$stanfit)
 
 asdf<-summary(sync.model, pars="b")
@@ -275,7 +286,7 @@ max<-asdf[[1]][617:704]; f<-data.frame(max=unlist(max)) #-0.3109 to 0.125
 d$min<-e$min; d$max<-f$max;
 
 
-summ_studyspp$min<-d$min; summ_studyspp$max<-d$max; summ_studyspp$median<-d$y
+summ_studyspp2$min<-d$min; summ_studyspp2$max<-d$max; summ_studyspp2$median<-d$y
 
 
 indiv_intxn <- merge(tog, summ_studyspp[,c("studyid","species","stanfit","min","max")], by.x=c("studyid", "spp1"), by.y=c("studyid", "species"), all.x=TRUE)
@@ -285,19 +296,19 @@ indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit"
 
 
 # Figure - RElationship between individual species change and synchrony change. Showing stan slope estimates with 95% credible intervals.
-tryagain<-merge(summ_studyspp, unique(rawlong.tot[,c("intid","species","spp")]), by="species")
-tryagain<-merge(tryagain, tog[,c("studyid","intid","meanchange")], by=c("studyid","intid"))
-uni<-as.data.frame(unique(tryagain$species))
+tryagain<-merge(summ_studyspp2, unique(rawlong.tot[,c("intid","species","spp")]), by="species")
+tryagain2<-merge(tryagain, tog[,c("studyid","intid","meanchange")], by=c("studyid","intid"))
+uni<-as.data.frame(unique(tryagain2$species))
 uni$label<-1:nrow(uni); names(uni)[1]<-"species"
-tryagain<-merge(tryagain, uni, by=c("species"))
+tryagain3<-merge(tryagain2, uni, by=c("species"))
 
 #sub1$label<-letters
 
 #NEWEST :#ggtitle("Stan slope estimates with 95% credible intervals")
-#text_high <- textGrob("Smaller change", gp=gpar(fontsize=10, fontface="bold"))
-#text_low <- textGrob("Larger change", gp=gpar(fontsize=10, fontface="bold"))
-b<-ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=factor(spp), shape=factor(spp)))+theme_bw()+theme(legend.position=c(.85, .1))+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+scale_color_discrete(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=8), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)
-multiplot(a,b, cols=2)
+text_small <- textGrob("Smaller synchrony change", rot=90, gp=gpar(fontsize=10, fontface="bold"))
+text_large <- textGrob("Larger synchrony change", rot=90, gp=gpar(fontsize=10, fontface="bold"))
+b<-ggplot(tryagain3, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=factor(spp), shape=factor(spp)))+theme_bw()+theme(legend.position=c(.83, .1))+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+scale_color_discrete(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=8), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)+annotation_custom(text_small, xmin=6, xmax=13, ymin=0.1, ymax=4.5)+annotation_custom(text_large, xmin=42, xmax=50, ymin=0.1, ymax=4.5)
+multiplot(a,c, cols=1)
 
 ##OLDER version
 ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=abs(meanchange), shape=factor(spp)))+theme_bw()+theme()+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_colour_continuous(name="abs(synchrony change)")+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=10), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)

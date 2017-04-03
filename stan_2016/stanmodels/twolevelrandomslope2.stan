@@ -31,7 +31,7 @@ transformed parameters{
 
 //Individual mean
 for (i in 1:N){
-		ypred[i]<-a[species[i]]+b[species[i]]*year[i];
+		ypred[i]=a[species[i]]+b[species[i]]*year[i];
 	}
 	
 }

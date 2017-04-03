@@ -1,6 +1,48 @@
 ### Figures ###
 
+
+
 Appendix
+# Temp change figure
+asdf<-summary(temp.model, pars=c("a","b"))
+lab<-as.data.frame(asdf[[1]][1:18]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][19:36]
+lab$id<-unique(species)
+
+me<-summary(temp.model, pars=c("a_study"))
+mean(me[[1]][1:13]) #rough guess on mu_a
+
+temp.id3$year2<-with(temp.id3, year-1981)
+
+ggplot(temp.id3, aes(y=envvalue,x=year2, colour=factor(datasetid)))+geom_line()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab(expression(paste("Temperature ",degree,"C")))+theme(legend.position="none")+xlab("Year")+geom_abline(slope=0.08, intercept=4.103861, size=1)+geom_vline(xintercept=0, linetype="dashed", size=0.3)
+
++geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)
+
+
+
+#temp sens figure
+asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
+lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][38:74]
+lab$id<-unique(species)
+
+me<-summary(temp.model, pars=c("a_study"))
+mean(me[[1]][1:13]) #rough guess on mu_a
+
+ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
+
+
+#temp sens figure
+asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
+lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
+lab$slope<-asdf[[1]][38:74]
+lab$id<-unique(species)
+
+me<-summary(temp.model, pars=c("a_study"))
+mean(me[[1]][1:13]) #rough guess on mu_a
+
+ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
+
 # Hinge vs. non-hinge
 
 sub<-subset(rawlong.tot, intid==170)

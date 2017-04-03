@@ -22,6 +22,7 @@ library(grid)
 library(nlme)
 library(dplyr)
 library(ggrepel)
+library(reshape)
 set_cppo("fast")  # for best running speed
 source("/users/kharouba/google drive/UBC/multiplot.R")
 #library(reshape)
@@ -78,7 +79,7 @@ sem<-sd(it1000)/sqrt(length(it1000)); sem
 c(mean(it1000)-2*sem,mean(it1000)+2*sem)
 
 
-#individaul species
+#individual species
 summ_studyspp <- unique(pre_cc[,c("studyid", "species")]);
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 it1000 <- matrix(0, ncol=3000, nrow=Nspp) #2000 iterations for 53 interactions;
@@ -132,6 +133,9 @@ for (i in 3000:6000){ # 2000 iterations?
 synch.model<-it1000
 meanchange <- rowMeans(it1000, na.rm=TRUE); mean(meanchange)
 
+nulldata<-melt(it1000[,2001:3000])
+names(nulldata)[1]<-"id"; names(nulldata)[2]<-"iteration"; names(nulldata)[3]<-"sync.change"; 
+
 sem<-sd(rowMeans(it1000, na.rm=TRUE))/sqrt(length(rowMeans(it1000, na.rm=TRUE))); sem
 #95% confidence intervals of the mean
 c(mean(rowMeans(it1000, na.rm=TRUE))-2*sem,mean(rowMeans(it1000, na.rm=TRUE))+2*sem)
@@ -144,7 +148,7 @@ unis<-unique(pre_cc_int[,c("studyid","intid","species")])
 pre_cc2<-merge(pre_cc, unis, by=c("studyid","species"))
 ggplot(pre_cc2, aes(x=year, y=phenovalue, colour=factor(species)))+geom_point()+facet_wrap(~intid)+theme(legend.position="false")
 
-
+******** REPEAT HERE 5X **********
 ### SIMULATE DATA FOR SPECIES WITH SAME SPP INTERACTION STRUCTURE AS FULL DATASET ####
 #### NEW #### Dec 7 2016
 # Start with 28 interactions where BOTH partners are not found in other intxns (n=54species)
@@ -454,7 +458,7 @@ species <- as.numeric(as.factor(total2$species))
 year <- total2$year_null
 
 # new stan
-new.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+new.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=12000, chains=4)
 print(new.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 gooey <- extract(new.model)
@@ -482,26 +486,53 @@ for (i in 3000:6000){ # 2000 iterations?
     names(andtheanswer2)[4]<-"model.y"
     it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer2$model.y #model.x=spp1
 }
-mos<-mean(rowMeans(it1000, na.rm=TRUE)); null<-rowMeans(it1000, na.rm=TRUE)
+nots<-data.frame(array(0,c(55,2)))
+nots$id<-1:55
+nots$meanchange <- rowMeans(it1000, na.rm=TRUE) #mean 
+
+### RESULTS:
+*****only create data frame for the first simulation, 
+distn<-data.frame(array(0,c(5,7)))
+names(distn)[1]<-"id"; names(distn)[2]<-"mean"; names(distn)[3]<-"low_CI"; names(distn)[4]<-"high_CI"; names(distn)[5]<-"magnitude_mean"; names(distn)[6]<-"mag_low_CI"; names(distn)[7]<-"mag_high_CI";
+distn$id<-1:5
+*********
+Now add to it manually:
+mistake- replaced magnitude mean of 2nd sim with 3rd
+
+
+
+distn[5,"mean"]<-mean(rowMeans(it1000, na.rm=TRUE))
 
 sem<-sd(rowMeans(it1000, na.rm=TRUE))/sqrt(length(rowMeans(it1000, na.rm=TRUE))); sem
 #95% confidence intervals of the mean
-c(mean(rowMeans(it1000, na.rm=TRUE))-2*sem,mean(rowMeans(it1000, na.rm=TRUE))+2*sem)
+ci<-c(mean(rowMeans(it1000, na.rm=TRUE))-2*sem,mean(rowMeans(it1000, na.rm=TRUE))+2*sem)
+
+distn[5,"low_CI"]<-ci[1]
+distn[5,"high_CI"]<-ci[2]
 
 
 #MAGNITUDE
-hist(abs(rowMeans(it1000, na.rm=TRUE)))
-median(abs(rowMeans(it1000, na.rm=TRUE)))
-
+distn[5,"magnitude_mean"]<-mean(abs(rowMeans(it1000, na.rm=TRUE)))
 sem<-sd(abs(rowMeans(it1000, na.rm=TRUE)))/sqrt(length(abs(rowMeans(it1000, na.rm=TRUE)))); sem
 #95% confidence intervals of the mean
-c(mean(abs(rowMeans(it1000, na.rm=TRUE)))-2*sem,mean(abs(rowMeans(it1000, na.rm=TRUE)))+2*sem)
+ci<-c(mean(abs(rowMeans(it1000, na.rm=TRUE)))-2*sem,mean(abs(rowMeans(it1000, na.rm=TRUE)))+2*sem)
+
+distn[5,"mag_low_CI"]<-ci[1]
+distn[5,"mag_high_CI"]<-ci[2]
+
+write.csv(distn, "nullmodel_sync.csv")
 
 #FIGURE 
 tog$null<-null[1:54]
 text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
 text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
 ggplot(tog, aes(x=null))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+xlim(-1.5, 1.4)+annotation_custom(text_high, xmin=1.0, xmax=1.0, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+
+
+nulldata<-melt(it1000[,2001:3000])
+names(nulldata)[1]<-"id"; names(nulldata)[2]<-"iteration"; names(nulldata)[3]<-"sync.change"; 
+
+c<-ggplot(nots, aes(x=meanchange))+geom_histogram(colour="black")+theme_bw()+xlim(range(tog$meanchange))+annotation_custom(text_high, xmin=1.0, xmax=1.0, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
 
 
 

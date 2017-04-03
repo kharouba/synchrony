@@ -104,7 +104,7 @@ studyid <- as.numeric(as.factor(sock$studyid))
 year <- clim3$yr1981
 
 #Feb 2017: don't have enough repeating species ACROSS studies to esimate error, therefore no study as grouping
-temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=10000, chains=4)
+temp.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=14000, chains=4)
 print(temp.model, pars = c("mu_b", "sigma_y", "a", "b"))
 #temp.model<-stan("stanmodels/twolevelrandomeffects2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 #print(temp.model, pars = c("mu_a","mu_b", "sigma_y", "a", "b"))
@@ -176,28 +176,6 @@ sem<-sd(summ_studyspp$tempchange)/sqrt(length(summ_studyspp$tempchange)); sem
 #95% confidence intervals of the mean
 c(mean(summ_studyspp$tempchange)-2*sem,mean(summ_studyspp$tempchange)+2*sem)
 
-#temp sens figure
-asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
-lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
-lab$slope<-asdf[[1]][38:74]
-lab$id<-unique(species)
-
-me<-summary(temp.model, pars=c("a_study"))
-mean(me[[1]][1:13]) #rough guess on mu_a
-
-ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
-
-
-#temp sens figure
-asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
-lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
-lab$slope<-asdf[[1]][38:74]
-lab$id<-unique(species)
-
-me<-summary(temp.model, pars=c("a_study"))
-mean(me[[1]][1:13]) #rough guess on mu_a
-
-ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
 
 # STEP 4- run stan on doy~year
 
@@ -281,7 +259,7 @@ year <- abs(tdata3$temp.change) #absolute value of temp change
 
 
 # Feb 2017 decisions: (1) Not enough variation within species or studies therefore do not pool slopes; (2) Not enough repeating species ACROSS studies to justify including study as grouping, therefore two level random intercept model.
-cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
+#cov.model<-stan("stanmodels/twolevelrandomintercept2.stan", data=c("N","Nspp","y","species","year"), iter=3000, chains=4)
 
 # March 2017 decision- not enough variation within species to assign each species its own slope (i.e. no varying slopes) 
 cov.model<-stan("stanmodels/twolevelrandomintercept_woslopes.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
@@ -326,7 +304,7 @@ mean(rowMeans(it2000, na.rm=TRUE))
 
 #Figure-Relationship between temperature change and phenological change show 95%CI around (slope) estimates of phenological and temperature (i.e. b_spp), black line is fit with mu_a and mu_b
 #load data from above
-ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("abs(Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=0.28, intercept=-0.08, size=1.5)
+ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=-0.24, intercept=-0.49, size=1.5)
 #geom_ribbon(aes(ymin=-0.065, ymax=-0.0177), alpha=0.2)
 
 #for display
