@@ -28,6 +28,8 @@ source("/users/kharouba/google drive/UBC/multiplot.R")
 #library(reshape)
 # library(lme4)
 
+#setwd('~/Documents/git/projects/trophsynch/synchrony/stan_2016')
+
 #Step 1- create pre_climate change dataset
 rawlong <- read.csv("input/rawlong2.csv", header=TRUE)
 source("input/datacleaningmore.R")
@@ -67,7 +69,7 @@ dim(rawlong.tot2)
 length(unique(pre_cc$studyid))
 length(unique(rawlong.tot2$studyid))
 
-#
+# overall mu_b
 fas<-extract(null.model)
 it1000 <- matrix(0, ncol=3000, nrow=1)
 for (i in 3000:6000){ # 3000 iterations?
@@ -79,15 +81,16 @@ sem<-sd(it1000)/sqrt(length(it1000)); sem
 c(mean(it1000)-2*sem,mean(it1000)+2*sem)
 
 
-#individual species
-summ_studyspp <- unique(pre_cc[,c("studyid", "species")]);
+#individual species (over-writing it1000 above)
+summ_studyspp <- unique(pre_cc[,c("studyid", "species")])
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 it1000 <- matrix(0, ncol=3000, nrow=Nspp) #2000 iterations for 53 interactions;
 for (i in 3000:6000){ # 2000 iterations?
-    summ_studyspp$model <- goo$b[i,]
+    summ_studyspp$model <- fas$b[i,] # changed goo to fas
    it1000[,(i-3000)] <- summ_studyspp$model
 }
 #spp.model<-it1000
+# not sure if we want the below -- it is estimating over b I think ... 
 hist(rowMeans(it1000, na.rm=TRUE)); median(rowMeans(it1000, na.rm=TRUE))
 sem<-sd(rowMeans(it1000, na.rm=TRUE))/sqrt(length(rowMeans(it1000, na.rm=TRUE))); sem
 #95% confidence intervals of the mean
@@ -120,10 +123,10 @@ intid.nodups[13,2]<-"Diatom4c spp."
 summ_studyspp <- unique(pre_cc[,c("studyid", "species")]);
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
 
-#For interactions AND synchrony change
+#For interactions AND synchrony change (over-writing it1000 above, again!)
 it1000 <- matrix(0, ncol=3000, nrow=length(unique(intid.sm$intid))) #2000 iterations for 53 interactions;
 for (i in 3000:6000){ # 2000 iterations?
-    summ_studyspp$model <- goo$b[i,]
+    summ_studyspp$model <- fas$b[i,] # changed goo to fas
     andtheanswer <- merge(intid.nodups, summ_studyspp, by.x=c("studyid", "spp1"),
         by.y=c("studyid", "species"), all.x=TRUE)
     andtheanswer <- merge(andtheanswer, summ_studyspp, by.x=c("studyid", "spp2"),
@@ -131,7 +134,7 @@ for (i in 3000:6000){ # 2000 iterations?
     it1000[,(i-3000)] <- andtheanswer$model.x-andtheanswer$model.y #model.x=spp1
 }
 synch.model<-it1000
-meanchange <- rowMeans(it1000, na.rm=TRUE); mean(meanchange)
+meanchange <- rowMeans(it1000, na.rm=TRUE); mean(meanchange) # ... again, what are we using this for? 
 
 nulldata<-melt(it1000[,2001:3000])
 names(nulldata)[1]<-"id"; names(nulldata)[2]<-"iteration"; names(nulldata)[3]<-"sync.change"; 
@@ -146,7 +149,7 @@ pre_cc_int<-merge(rawlong.tot, sss2, by=c("studyid", "species"))
 
 unis<-unique(pre_cc_int[,c("studyid","intid","species")])
 pre_cc2<-merge(pre_cc, unis, by=c("studyid","species"))
-ggplot(pre_cc2, aes(x=year, y=phenovalue, colour=factor(species)))+geom_point()+facet_wrap(~intid)+theme(legend.position="false")
+ggplot(pre_cc2, aes(x=year, y=phenovalue, colour=factor(species)))+geom_point()+facet_wrap(~intid)+theme(legend.position="false") # cool!
 
 ******** REPEAT HERE 5X **********
 ### SIMULATE DATA FOR SPECIES WITH SAME SPP INTERACTION STRUCTURE AS FULL DATASET ####
@@ -243,6 +246,8 @@ asdf<-rowcount+(nrow(rands)-1)
 int<-int+1
 nonrepeatspp<-nonrepeatspp+1
 
+## I don't think this loop ever closes!
+        
 #for OTHER sppb
 for(j in 2:length(newcount)){
 spp_b<-sppa_b-(sample(meanchange, size=1)) # calculate b for sppb from spp a and sync change
