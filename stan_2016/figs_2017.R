@@ -13,35 +13,39 @@ me<-summary(temp.model, pars=c("a_study"))
 mean(me[[1]][1:13]) #rough guess on mu_a
 
 temp.id3$year2<-with(temp.id3, year-1981)
+temp.id3$lowerCI<-0.08*temp.id3$year2+(1.26-0.06)
+temp.id3$upperCI<-0.08*temp.id3$year2+(1.26+0.1)
 
-ggplot(temp.id3, aes(y=envvalue,x=year2, colour=factor(datasetid)))+geom_line()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab(expression(paste("Temperature ",degree,"C")))+theme(legend.position="none")+xlab("Year")+geom_abline(slope=0.08, intercept=4.103861, size=1)+geom_vline(xintercept=0, linetype="dashed", size=0.3)
+b<-ggplot(temp.id3, aes(y=envvalue,x=year2, colour=factor(datasetid)))+geom_line()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab(expression(paste("Temperature ",degree,"C")))+theme(legend.position="none")+xlab("Year")+geom_vline(xintercept=0, linetype="dashed", size=0.3)+geom_abline(slope=0.08, intercept=1.26, size=0.75)+geom_ribbon(aes(x=year2, ymin=lowerCI, ymax=upperCI), colour="grey", fill="grey", alpha=0.6)+annotation_custom(grob = textGrob(label = "b)", hjust = 0, gp = gpar(cex = 1.5)), ymin = 19, ymax = 19, xmin = -13, xmax = -13)
 
 +geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)
 
 
 
 #temp sens figure
-asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
+asdf<-summary(tempsens.model, pars=c("a","b"))
 lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
 lab$slope<-asdf[[1]][38:74]
 lab$id<-unique(species)
+clim3$ymin<--6.65
+clim3$ymax<--3.02
+clim3$lowerCI<--4.79*clim3$envvalue+(147-6.65)
+clim3$upperCI<--4.79*clim3$envvalue+(147+3.00)
 
-me<-summary(temp.model, pars=c("a_study"))
-mean(me[[1]][1:13]) #rough guess on mu_a
+me<-summary(tempsens.model, pars=c("a"))
+mean(me[[1]][1:37]) #rough guess on mu_a
 
-ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
+suck<-summary(tempsens.model, pars="ypred")
+nope<-as.data.frame(suck[[1]][1:764]); names(nope)[1]<-"ypred"
+#nope$grp<-rep(1:37, each=1000); names(nope)[1]<-"ypred"
+#yes <- aggregate(nope["ypred"], nope["grp"], FUN=mean); 
+#data2<-merge(yes, data, by="grp")
 
 
-#temp sens figure
-asdf<-summary(temp.model, pars=c("a_spp","b_spp"))
-lab<-as.data.frame(asdf[[1]][1:37]); names(lab)[1]<-"int"
-lab$slope<-asdf[[1]][38:74]
-lab$id<-unique(species)
+a<-ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-4.78, intercept=147, size=1)+geom_ribbon(aes(x=envvalue, ymin=lowerCI, ymax=upperCI), colour="grey", fill="grey", alpha=0.6)+annotation_custom(grob = textGrob(label = "a)", hjust = 0, gp = gpar(cex = 1.5)), ymin = 335, ymax = 335, xmin = -8.5, xmax = -8.5)
 
-me<-summary(temp.model, pars=c("a_study"))
-mean(me[[1]][1:13]) #rough guess on mu_a
+multiplot(a,b, cols=2)
 
-ggplot(clim3, aes(y=phenovalue,x=envvalue, colour=factor(species)))+geom_point()+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenology (doy)")+theme(legend.position="none")+xlab(expression(paste("Temperature ",degree,"C")))+geom_abline(aes(intercept=int, slope=slope, colour=factor(id)), data=lab)+geom_abline(slope=-3.19, intercept=132, size=1.5)
 
 # Hinge vs. non-hinge
 

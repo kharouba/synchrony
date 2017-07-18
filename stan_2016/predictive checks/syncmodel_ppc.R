@@ -7,13 +7,13 @@ comppool.wtype<-lm(phenovalue~year*spp-1, data=rawlong.nodups)
 #nopool<-lm(phenovalue~year*species, data=rawlong.nodups)
 # No pooling:
 #rawlong.tot$yr1981 <- rawlong.tot$newyear-1981
-uniquespp<-unique(rawlong.tot$species)
+uniquespp<-unique(rawlong.tot2$species)
 #uniquespp<-unique(rawlong.tot$newid)
 slopefits<-rep(NA< length(uniquespp))
 varfits<-rep(NA< length(uniquespp))
 intfits<-rep(NA< length(uniquespp))
 for(eachsp in 1:length(uniquespp)){
-	lmhere<-lm(phenovalue~yr1981, data=subset(rawlong.tot, species==uniquespp[eachsp]))
+	lmhere<-lm(phenovalue~yr1981, data=subset(rawlong.tot2, species==uniquespp[eachsp]))
 	slopefits[eachsp]<-coef(lmhere)[2]
 	varfits[eachsp]<-(summary(lmhere)$sigma)**2
 	intfits[eachsp]<-coef(lmhere)[1]

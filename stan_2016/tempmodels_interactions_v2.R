@@ -45,6 +45,7 @@ merges2 <- merges2[with(merges2, order(species, year)),]
 #ddply(dataset, c("datasetid"), summarise,
 #    nspp=n_distinct(species))
 
+Option 1:
 ## FOR REPORTING TEMP CHANGE IN THE PAPER: only on unique datasets (n=18)
 temp.id<-unique(datasetid.trans2[,1:3])
 temp.id2<-merge(merges[,c("studyid","species","year","yr1981","envvalue","envtype")], temp.id)
@@ -68,7 +69,7 @@ for (i in 3000:6000){ # 2000 iterations?
 mean(rowMeans(it1000, na.rm=TRUE))
 
 
-
+Option2:
 ## OTHERWISE-- CLEAN UP TEMP DATA- get one dataset per interaction ##
 
 temp.id<-datasetid.trans2[,1:3]
@@ -82,6 +83,7 @@ spp.id2<-merge(spp.id, unique(rawlong.tot[,c("studyid","species","spp")]))
 spp.id2$row<-1:nrow(spp.id2)
 #assign one role for competitions:
 spp.id3<-subset(spp.id2, row!=7 & row!=10 & row!=14 & row!=15)
+spp.id3<-subset(spp.id2, row!=8 & row!=9 & row!=14 & row!=15)
 
 
 #mult temp change per interaction
@@ -89,6 +91,8 @@ spp.id3<-subset(spp.id2, row!=7 & row!=10 & row!=14 & row!=15)
 #single<-subset(spp.id, intid!="155" & intid!="170" & intid!="197" & intid!="198" & intid!="199" & intid!="200" & intid!="236" & intid!="237")
 #choose random species per interaction (matters for where mult temp change per interaction but easy to do it where same temp.change repeated 2x)
 uni_int<- data.frame(array(0, c(nrow=length(unique(spp.id3$intid)), ncol=5))) 
+
+#uni_int$studyid<-as.factor(uni_int$studyid)
 #b<-as.character(unique(mult$intid)); Bgroups<-length(b)
 b<-as.character(unique(spp.id3$intid)); Bgroups<-length(b)
 count<-1
@@ -96,8 +100,8 @@ for(i in 1:length(b)){
 	int<-subset(spp.id3, intid==b[i])
 	#int$row<-1:2 #for random
 	#sub<-subset(int, row==sample(1:2, 1)) #for random
-	#sub<-subset(int, spp=="spp1") #choose resource
-	sub<-subset(int, spp=="spp2") #choose consumer
+	sub<-subset(int, spp=="spp1") #choose resource
+	#sub<-subset(int, spp=="spp2") #choose consumer
 	uni_int[count,]<-sub[,1:5]
 	count<-count+1
 }
@@ -119,6 +123,27 @@ print(temp.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 #for covariate model: #assign temp.change back to interaction
 #load intid.nodups2
+intid_full <- read.csv("input/raw_oct.csv", header=TRUE)
+#fix for diatom4 spp. (Dec 2016)
+sub<-subset(intid_full, intid=="194");
+sub[,c("spp1")]<-"Diatom4a spp."
+intid_full<-rbind(intid_full, sub)
+sub<-subset(intid_full, intid=="195");
+sub[,c("spp1")]<-"Diatom4b spp."
+intid_full<-rbind(intid_full, sub)
+sub<-subset(intid_full, intid=="196");
+sub[,c("spp1")]<-"Diatom4c spp."
+intid_full<-rbind(intid_full, sub)
+intid_full<-subset(intid_full, spp1!="Diatom4 spp.")
+intid_full<-subset(intid_full, spp1!="asdf1" & spp2!="asdf2")
+
+lal<-unique(rawlong.tot[,c("intid","terrestrial")])
+intid2<-merge(intid_full, lal, by=c("intid"))
+intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
+intid.nodups <- intid.sm[!duplicated(intid.sm),]
+intid.nodups2<-merge(unique(merges2[,c("studyid","intid")]), intid.nodups)
+
+
 goo <- extract(temp.model)
 summ_studyspp<-unique(merges_again[,c("studyid","species")])
 it1000 <- matrix(0, ncol=3000, nrow=22)
@@ -158,25 +183,6 @@ fh.sim <- extract(pheno.model)# inc_warmup=FALSE) #only extracts parameters, doe
 specieschar.formodel <- aggregate(merges2["phenovalue"], merges2[c("studyid", "species", "intid", "terrestrial","spp")], FUN=length) 
 specieschar.formodel.sm <- subset(specieschar.formodel, select=c("studyid", "species","intid"))
 specieschar.formodel.sm  <- specieschar.formodel.sm [with(specieschar.formodel.sm , order(intid)),]
-intid_full <- read.csv("input/raw_oct.csv", header=TRUE)
-#fix for diatom4 spp. (Dec 2016)
-sub<-subset(intid_full, intid=="194");
-sub[,c("spp1")]<-"Diatom4a spp."
-intid_full<-rbind(intid_full, sub)
-sub<-subset(intid_full, intid=="195");
-sub[,c("spp1")]<-"Diatom4b spp."
-intid_full<-rbind(intid_full, sub)
-sub<-subset(intid_full, intid=="196");
-sub[,c("spp1")]<-"Diatom4c spp."
-intid_full<-rbind(intid_full, sub)
-intid_full<-subset(intid_full, spp1!="Diatom4 spp.")
-intid_full<-subset(intid_full, spp1!="asdf1" & spp2!="asdf2")
-
-lal<-unique(rawlong.tot[,c("intid","terrestrial")])
-intid2<-merge(intid_full, lal, by=c("intid"))
-intid.sm <- subset(intid2, select=c("studyid", "spp1", "spp2", "intid" , "interaction","terrestrial"))
-intid.nodups <- intid.sm[!duplicated(intid.sm),]
-intid.nodups2<-merge(unique(merges2[,c("studyid","intid")]), intid.nodups)
 
 summ_studyspp <- subset(specieschar.formodel, select=c("studyid", "species")); summ_studyspp<-unique(summ_studyspp)
 summ_studyspp  <- summ_studyspp[with(summ_studyspp , order(species)),]
@@ -250,11 +256,11 @@ tdata<-merge(ndata, tog, by=c("id","iteration"))
 N<-nrow(tdata)
 Nspp <- length(unique(tdata$id)) #J
 species <- as.numeric(as.factor(tdata$id))
-y <- tdata$sync.change 
+y <- abs(tdata$sync.change) 
 year <- tdata$temp.change #absolute value of temp change
 
 # March 2017 decision- not enough variation within species to assign each species its own slope (i.e. no varying slopes) 
-cov.model<-stan("stanmodels/twolevelrandomintercept_woslopes.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+cov.model<-stan("stanmodels/twolevelrandomintercept_woslopes_cov.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
 print(cov.model, pars = c("mu_a", "mu_b","sigma_y", "a"))
 
 

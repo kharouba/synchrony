@@ -1,7 +1,7 @@
 #Dec 2016- Look at workflow from Lizzie- 2016Nov18_nullmodel.pdf
 ## Null model used for PHENOLOGICAL change, to explore effect of length of time series on ability to detect PHENO change
 # Calculates slopes first
-
+setwd("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016")
 st.err <- function(x) {sd(x)/sqrt(length(x))}
 
 #Step 1- create pre_climate change dataset
@@ -30,7 +30,8 @@ year <- pre_cc$year
 #16 interactions from pre_cc
 #31 species from pre_cc (31 spp all together, 2 spp repeat across intxns)
 
-null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+null.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=14000, chains=4)
+print(null.model, pars = c("mu_b", "sigma_y", "a", "b"))
 faa <- extract(null.model)
 solo<-unique(pre_cc[,c("studyid","species")])
 
@@ -52,7 +53,7 @@ asdf2<-rowcount2+(88-1)
 evens<-data.frame(array(0,c(88*8, 5)))
 names(evens)[1]<-"species"; names(evens)[2]<-"time_length";names(evens)[3]<-"phenochange"; names(evens)[4]<-"min"; names(evens)[5]<-"max"
 
-for(le in 1:length(timeseries)){ #length(timeseries)
+for(le in 2:length(timeseries)){ #length(timeseries)
 asdf<-rowcount+(timeseries[le]-1) #number of interactions
 new<-data.frame(array(0,c(20000,4)))
 names(new)[1]<-"species"; names(new)[2]<-"time_length";names(new)[3]<-"y_null"; names(new)[4]<-"year_null"
@@ -81,7 +82,8 @@ Nspp <- length(unique(new$species))
 species <- as.numeric(as.factor(new$species))
 year <- new$year_null
 
-new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=4000, chains=4)
+new.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/stan_2016/stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(new.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
 asdf<-summary(new.model, pars="b")
@@ -110,7 +112,9 @@ evens2$names<-with(evens2, paste(time_length, species,sep="."))
 evens2$names<-as.numeric(evens2$names)
 evens2  <- evens2[with(evens2, order(names)),]
 
-write.csv(evens2, "/output/nullmodel_pheno_time_byslope.csv")
+write.csv(evens2, "/output/nullmodel_pheno_time_byslope2.csv")
+temporary:
+keep<-evens
 
 evens2$names2<-evens2$names
 sub<-subset(evens2, species=="1");
@@ -161,7 +165,11 @@ evens2<-rbind(evens2, sub)
 evens2  <- evens2[with(evens2, order(names2)),]
 
 #ggtitle("Mean phenological change with 95% CI")
-ggplot(evens2, (aes(x=factor(names2), y=phenochange, colour=factor(time_length))))+geom_errorbar(aes(ymin=min, ymax=max, width=.0025, colour=factor(time_length)))+geom_point(colour="black")+theme(legend.position="false")+geom_hline(yintercept=0, linetype="dashed", size=1)+geom_vline(xintercept=264, linetype="dotted", size=0.75)+geom_vline(xintercept=352, linetype="dotted", size=0.75)+theme(axis.title.x = element_text(size=15), axis.text.x=element_blank(), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Phenological change (days/yr)")+xlab("Time series length")
+story <- read.csv("/output/nullmodel_pheno_time_byslope2.csv", header=TRUE)
+evens2$phenochangeperdec<-with(evens2, phenochange*10)
+evens2$minperdec<-with(evens2, min*10)
+evens2$maxperdec<-with(evens2, max*10)
+ggplot(evens2, (aes(x=factor(names2), y=phenochangeperdec, colour=factor(time_length))))+geom_errorbar(aes(ymin=minperdec, ymax=maxperdec, width=.0025, colour=factor(time_length)))+geom_point(colour="black")+theme(legend.position="false")+geom_hline(yintercept=0, linetype="dashed", size=1)+geom_vline(xintercept=264, linetype="dotted", size=0.75)+geom_vline(xintercept=352, linetype="dotted", size=0.75)+theme(axis.title.x = element_text(size=15), axis.text.x=element_blank(), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Phenological change (days/decade)")+xlab("Time series length")+annotation_custom(grob = textGrob(label = "5", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 44, xmax = 44)+annotation_custom(grob = textGrob(label = "10", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 132, xmax = 132)+annotation_custom(grob = textGrob(label = "15", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 220, xmax = 220)+annotation_custom(grob = textGrob(label = "20", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 308, xmax = 308)+annotation_custom(grob = textGrob(label = "25", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 396, xmax = 396)+annotation_custom(grob = textGrob(label = "30", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 484, xmax=484)+annotation_custom(grob = textGrob(label = "35", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 572, xmax = 572)+annotation_custom(grob = textGrob(label = "40", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4.2, ymax = -4.2, xmin = 660, xmax = 660)
 
 
 ##

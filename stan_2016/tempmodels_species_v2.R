@@ -138,10 +138,11 @@ clim3$count<-1
 tool<-with(clim3, aggregate(count, by=list(studyid, species), FUN=sum, na.rm=T)) 
 names(tool)[1]<-"studyid"; names(tool)[2]<-"species"; names(tool)[3]<-"length"
 
-d2<-cbind(d, tool)
+d2<-cbind(summ_studyspp, tool)
 m1<-lm(y~length, d2); summary(m1)
 
 ##alt
+#Population-level slope estimates in text are from “print(stan)”
 # for interpretation:
 # for mu_b
 fas<-extract(temp.model)
@@ -304,8 +305,26 @@ mean(rowMeans(it2000, na.rm=TRUE))
 
 #Figure-Relationship between temperature change and phenological change show 95%CI around (slope) estimates of phenological and temperature (i.e. b_spp), black line is fit with mu_a and mu_b
 #load data from above
-ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=-0.24, intercept=-0.49, size=1.5)
-#geom_ribbon(aes(ymin=-0.065, ymax=-0.0177), alpha=0.2)
+#suck<-summary(cov.model, pars="ypred")
+#nrow(suck[[1]])
+#nope<-as.data.frame(suck[[1]][1:37000]);
+#nope$grp<-rep(1:37, each=1000); names(nope)[1]<-"ypred"
+#yes <- aggregate(nope["ypred"], nope["grp"], FUN=mean); 
+#data2<-merge(yes, data, by="grp")
+data$ymin<--0.29
+data$ymax<-0.31
+data$tempchange_dec<-with(data, tempchange*10)
+data$temp_min_dec<-with(data, temp_min*10)
+data$temp_max_dec<-with(data, temp_max*10)
+data$phenochange_dec<-with(data, phenochange*10)
+data$pheno_min_dec<-with(data, pheno_min*10)
+data$pheno_max_dec<-with(data, pheno_max*10)
+
+ggplot(data, aes(y=phenochange_dec,x=tempchange_dec))+geom_errorbar(aes(ymin=pheno_min_dec, ymax=pheno_max_dec), colour="grey")+geom_errorbarh(aes(xmin=temp_min_dec, xmax=temp_max_dec), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenological change (days/decade))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/decade)")))
+#+geom_abline(slope=0, intercept=-0.51)+geom_ribbon(aes(x=tempchange, ymin=ymin, ymax=ymax))
+
+
+ggplot(data, aes(y=phenochange,x=tempchange))+geom_errorbar(aes(ymin=pheno_min, ymax=pheno_max), colour="grey")+geom_errorbarh(aes(xmin=temp_min, xmax=temp_max), colour="grey")+geom_point(size=2)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+theme_bw()+ylab("Phenological change (days/yr))")+theme_bw()+xlab(expression(paste("Temperature change (",degree,"C/year)")))+geom_abline(slope=-0.24, intercept=-0.49, size=1.5)+geom_ribbon(aes(x=tempchange, ymin=-0.065, ymax=-0.0177), alpha=0.2)
 
 #for display
 study <- aggregate(tdata2["pheno.change"], tdata2["studyid"], FUN=mean); names(study)[2]<-"pheno"

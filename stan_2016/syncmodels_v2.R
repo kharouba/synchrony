@@ -41,8 +41,19 @@ sync.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","
 print(sync.model, pars = c("mu_b", "sigma_y", "a", "b"))
 
 
+#just for pheno change ie. >1981
+aftercc<-subset(rawlong.tot2, year>1981)
+N <- nrow(aftercc)
+y <- aftercc$phenovalue
+Nspp <- length(unique(aftercc$species)) #newid is character !
+species <- as.numeric(as.factor(aftercc$species))
+year <- aftercc$yr1981
+pheno.model<-stan("stanmodels/twolevelrandomslope2.stan", data=c("N","Nspp","y","species","year"), iter=8000, chains=4)
+print(pheno.model, pars = c("mu_b", "sigma_y", "a", "b"))
+
 #For pheno change
-fh.sim <- extract(sync.model)# 
+#Population-level slope estimates in text are from “print(stan)”
+fh.sim <- extract(pheno.model)# 
 it1000 <- matrix(0, ncol=3000, nrow=1) #2000 iterations for 53 interactions;
 for (i in 3000:6000){ # 2000 iterations?
     it1000[,(i-3000)] <- fh.sim$mu_b[i]
@@ -99,7 +110,15 @@ for (i in 3000:6000){ # 2000 iterations?
 }
 synch.model<-it1000
 
-
+alls <- matrix(0, ncol=4, nrow=54);
+for(i in 1:nrow(synch.model)){
+sem<-sd(synch.model[i,])/sqrt(length(synch.model[i,])); sem
+#95% confidence intervals of the mean
+ci<-c(mean(synch.model[i,])-2*sem,mean(synch.model[i,])+2*sem)
+alls[i,2]<-ci[1]
+alls[i,3]<-ci[2]
+alls[i,4]<-mean(synch.model[i,])
+}
 
 
 # FOR INTERPRETATION
@@ -245,27 +264,30 @@ cov.model<-stan("/users/kharouba/google drive/UBC/synchrony project/analysis/sta
 print(cov.model, pars=c("mu_a", "mu_b", "sigma_y", "sigma_a","sigma_b"))
 
 ---
-#FIGURES
+#FIGURES-v2 (days/decade)
 # All groups together
 library(grid)
-text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
-text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+#text_high <- textGrob("Closer together", gp=gpar(fontsize=12, fontface="bold"))
+#text_low <- textGrob("Further apart", gp=gpar(fontsize=12, fontface="bold"))
+text_high <- textGrob("Closer together", gp=gpar(fontsize=10))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=10))
 null<-read.csv("nullmodel_sync.csv", header=TRUE, na.strings="NA", as.is=TRUE) #values for null model are from here
 tog$meanperdec<-with(tog, meanchange*10)
-a<-ggplot(tog, aes(x=meanchange*10))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.052, linetype="solid",size=1)+geom_vline(xintercept=0.0073, linetype=2,size=0.05)+geom_vline(xintercept=-0.0084, linetype=2,size=0.05)+geom_vline(xintercept=-0.0058, linetype=2,size=0.05)+geom_vline(xintercept=0.0094, linetype=2,size=0.05)+geom_vline(xintercept=0.0023, linetype=2,size=0.05)+annotation_custom(text_high, xmin=1.2, xmax=1.2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+tog$null<-nots$meanchange
+tog$nullperdec<-with(tog, null*10)
+#magnitude
+a<-ggplot(tog, aes(x=abs(meanperdec)))+geom_histogram(aes(x=abs(nullperdec), colour="red"), binwidth=0.2)+geom_histogram(binwidth=2, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=4.4, linetype="solid",size=1)+geom_vline(xintercept=0.23, linetype=2,size=0.75)+theme(legend.position="none", axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/decade")+ annotation_custom(grob = textGrob(label = "a)", hjust = 0, gp = gpar(cex = 1.5)), ymin = 21, ymax = 21, xmin = -1.5, xmax = -1.5)
 
 
-
-#Magnitude
-ggplot(tog, aes(x=abs(meanchange)))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0.44, linetype="solid",size=1)+geom_vline(xintercept=0.042, linetype=2,size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
-
-
-#Aquatic vs. terrestrial
-text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
-text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
-ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.4, xmax=-1.6, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+theme(legend.position="none")
+c<-ggplot(tog, aes(x=meanperdec))+geom_histogram(aes(x=nullperdec, colour="red"), binwidth=0.15)+geom_histogram(binwidth=2.25, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.51, linetype="solid",size=1)+geom_vline(xintercept=0.048, linetype=2,size=0.75)+annotation_custom(text_high, xmin=10.2, xmax=13, ymin=-0.28, ymax=-0.5)+annotation_custom(text_low, xmin=-13, xmax=-13, ymin=-0.23, ymax=-0.5)+theme(legend.position="none", axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/decade")+ annotation_custom(grob = textGrob(label = "c)", hjust = 0, gp = gpar(cex = 1.5)), ymin = 17, ymax = 17, xmin = -17.5, xmax = -17.5)
+#all five iterations:
++geom_vline(xintercept=-0.084, linetype=2,size=0.05)
+geom_vline(xintercept=0.073, linetype=2,size=0.05)
+geom_vline(xintercept=-0.058, linetype=2,size=0.05)
++geom_vline(xintercept=0.094, linetype=2,size=0.05)
 
 
+# Figure - RElationship between individual species change and synchrony change. Showing stan slope estimates with 95% credible intervals.
 #Link to individual species
 tog2<-tog[,c(1:6,9:10)]
 summ_studyspp2<-summ_studyspp[,1:2]
@@ -295,7 +317,6 @@ indiv_intxn <- merge(indiv_intxn, summ_studyspp[,c("studyid","species","stanfit"
 #with(indiv_intxn, cor(stanfit.x, stanfit.y))
 
 
-# Figure - RElationship between individual species change and synchrony change. Showing stan slope estimates with 95% credible intervals.
 tryagain<-merge(summ_studyspp2, unique(rawlong.tot[,c("intid","species","spp")]), by="species")
 tryagain2<-merge(tryagain, tog[,c("studyid","intid","meanchange")], by=c("studyid","intid"))
 uni<-as.data.frame(unique(tryagain2$species))
@@ -307,8 +328,36 @@ tryagain3<-merge(tryagain2, uni, by=c("species"))
 #NEWEST :#ggtitle("Stan slope estimates with 95% credible intervals")
 text_small <- textGrob("Smaller synchrony change", rot=90, gp=gpar(fontsize=10, fontface="bold"))
 text_large <- textGrob("Larger synchrony change", rot=90, gp=gpar(fontsize=10, fontface="bold"))
-b<-ggplot(tryagain3, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=factor(spp), shape=factor(spp)))+theme_bw()+theme(legend.position=c(.83, .1))+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+scale_color_discrete(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=8), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)+annotation_custom(text_small, xmin=6, xmax=13, ymin=0.1, ymax=4.5)+annotation_custom(text_large, xmin=42, xmax=50, ymin=0.1, ymax=4.5)
-multiplot(a,c, cols=1)
+text_left <- textGrob("Advancement", rot=0, gp=gpar(fontsize=8, fontface="bold"))
+text_right <- textGrob("Delay", rot=0, gp=gpar(fontsize=8, fontface="bold"))
+tryagain3$stanfit_dec<-with(tryagain3, stanfit*10)
+tryagain3$min_dec<-with(tryagain3, min*10)
+tryagain3$max_dec<-with(tryagain3, max*10)
+b<-ggplot(tryagain3, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit_dec, label = label))+geom_errorbar(aes(ymin=min_dec, ymax=max_dec, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=factor(spp), shape=factor(spp)))+theme_bw()+theme(legend.position=c(.83, .1))+xlab("interactions")+ylab("phenological change (days/decade)")+coord_flip()+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+scale_color_discrete(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=8), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)+annotation_custom(text_small, xmin=9, xmax=9, ymin=1, ymax=47)+annotation_custom(text_large, xmin=47, xmax=47, ymin=1, ymax=47)+annotation_custom(text_left, xmin=1, xmax=1, ymin=-26, ymax=-20)+annotation_custom(text_right, xmin=1, xmax=1, ymin=1, ymax=40)+annotation_custom(grob = textGrob(label = "b)", hjust = 0, gp = gpar(cex = 1.5)), ymin = -4, ymax = -50, xmin = 51, xmax = 54)
+
+multiplot(a,c,cols=1)
+multiplot(b,cols=1)
+
+#Figures- V1
+# All groups together
+library(grid)
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+null<-read.csv("nullmodel_sync.csv", header=TRUE, na.strings="NA", as.is=TRUE) #values for null model are from here
+tog$meanperdec<-with(tog, meanchange*10)
+a<-ggplot(tog, aes(x=meanchange))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=-0.052, linetype="solid",size=1)+geom_vline(xintercept=0.0073, linetype=2,size=0.05)+geom_vline(xintercept=-0.0084, linetype=2,size=0.05)+geom_vline(xintercept=-0.0058, linetype=2,size=0.05)+geom_vline(xintercept=0.0094, linetype=2,size=0.05)+geom_vline(xintercept=0.0023, linetype=2,size=0.05)+annotation_custom(text_high, xmin=1.2, xmax=1.2, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.2, xmax=-1.2, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+ annotation_custom(grob = textGrob(label = "a", hjust = 0, gp = gpar(cex = 1.5)), ymin = 15, ymax = 15, xmin = -2, xmax = -2)
+
+
+
+#Magnitude
+ggplot(tog, aes(x=abs(meanchange)))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0.44, linetype="solid",size=1)+geom_vline(xintercept=0.042, linetype=2,size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.5, xmax=-1.5, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")
+
+
+#Aquatic vs. terrestrial
+text_high <- textGrob("Closer together", gp=gpar(fontsize=13, fontface="bold"))
+text_low <- textGrob("Further apart", gp=gpar(fontsize=13, fontface="bold"))
+ggplot(tog, aes(x=meanchange, fill=terrestrial))+geom_histogram(binwidth=.5, alpha=.5, position="identity", colour="black")+theme_bw()+geom_vline(xintercept=0, linetype="dashed",size=1)+annotation_custom(text_high, xmin=1.5, xmax=1.5, ymin=-0.5, ymax=-0.5)+annotation_custom(text_low, xmin=-1.4, xmax=-1.6, ymin=-0.5, ymax=-0.5)+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=15), axis.title.y=element_text(size=15, angle=90))+ylab("Number of interactions")+xlab("Change in number of days/year")+theme(legend.position="none")
+
 
 ##OLDER version
 ggplot(tryagain, aes(x=factor(reorder(intid, abs(meanchange))), y=stanfit, label = label))+geom_errorbar(aes(ymin=min, ymax=max, linetype=factor(spp)), width=.0025, colour="black")+geom_hline(yintercept=0, linetype="dashed")+geom_point(size=4, aes(order=abs(meanchange), colour=abs(meanchange), shape=factor(spp)))+theme_bw()+theme()+xlab("interactions")+ylab("phenological change (days/year)")+coord_flip()+scale_colour_continuous(name="abs(synchrony change)")+scale_linetype(name="Species role", labels=c("Resource","Consumer"))+scale_shape(name="Species role", labels=c("Resource", "Consumer"))+theme(axis.title.x = element_text(size=15), axis.text.x=element_text(size=15), axis.text.y=element_text(size=10), axis.title.y=element_text(size=15, angle=90))+geom_text(size=3, hjust=2)

@@ -151,7 +151,7 @@ unis<-unique(pre_cc_int[,c("studyid","intid","species")])
 pre_cc2<-merge(pre_cc, unis, by=c("studyid","species"))
 ggplot(pre_cc2, aes(x=year, y=phenovalue, colour=factor(species)))+geom_point()+facet_wrap(~intid)+theme(legend.position="false") # cool!
 
-******** REPEAT HERE 5X **********
+******** REPEAT FROM HERE 5X **********
 ### SIMULATE DATA FOR SPECIES WITH SAME SPP INTERACTION STRUCTURE AS FULL DATASET ####
 #### NEW #### Dec 7 2016
 # Start with 28 interactions where BOTH partners are not found in other intxns (n=54species)
